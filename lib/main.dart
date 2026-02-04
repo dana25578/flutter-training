@@ -1,3 +1,4 @@
+import 'screens/category_items_page.dart';
 import 'package:flutter/material.dart';
 import 'screens/login_page.dart';
 import 'screens/signup_page.dart';
@@ -21,6 +22,9 @@ class MyApp extends StatelessWidget {
         },
         HomePage.routeName:(context){
           return HomePage();
+        },
+        CategoryItemsPage.routeName:(context){
+          return CategoryItemsPage();
         },
       },
     );
