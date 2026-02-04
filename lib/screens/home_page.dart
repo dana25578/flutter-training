@@ -1,6 +1,7 @@
 import 'package:app/screens/category_items_page.dart';
 import 'package:flutter/material.dart';
 import 'login_page.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatelessWidget{
   static const String routeName='/home';
@@ -8,38 +9,42 @@ class HomePage extends StatelessWidget{
   final String userName='dana';
   final List<Map<String,dynamic>> categories=[
     { 'name':'Shoes',
+      'image':'assets/images/sneakers.webp',
       'items':[
-        {'name': 'Running Shoes','price':60,'description':'comfortable'},
-        {'name':'Sneakers','price':45,'description':'casual style'},
-        {'name': 'Training Shoes','price':55,'decoration':'lightweight'},
-      ],
-      'name':'Bags',
+        {'name': 'Running Shoes','price':60,'description':'comfortable','image':'assets/images/running shoes.jpeg',},
+        {'name':'Sneakers','price':45,'description':'casual style','image':'assets/images/air sneakers.jpeg',},
+        {'name': 'Training Shoes','price':55,'description':'lightweight','image':'assets/images/training shoes.jpeg',},
+      ],},
+    { 'name':'Bags',
+      'image':'assets/images/backpack.jpeg',
       'items':[
-        {'name': 'Backpack','price':60,'description':'for school'},
-        {'name':'HandBag','price':45,'description':'daily use'},
-        {'name': 'Travel bag','price':55,'decoration':'large capacity'},
-      ],
-      'name':'Watches',
+        {'name': 'Backpack','price':60,'description':'for school','image':'assets/images/backpack.jpeg',},
+        {'name':'HandBag','price':45,'description':'daily use','image':'assets/images/handbag.webp',},
+        {'name': 'Travel bag','price':55,'description':'large capacity','image':'assets/images/travel bag.jpeg',},
+      ],},
+      {'name':'Watches',
+      'image':'assets/images/smart watch.jpeg',
       'items':[
-        {'name': 'classic watch','price':60,'description':'elegant'},
-        {'name':'sport watch','price':45,'description':'waterproof'},
-        {'name': 'Smart watch','price':55,'decoration':'modern'},
-      ],
-      'name':'Clothes',
+        {'name': 'classic watch','price':60,'description':'elegant','image':'assets/images/classic watch.jpeg',},
+        {'name':'sport watch','price':45,'description':'waterproof','image':'assets/images/sport watch.jpeg',},
+        {'name': 'Smart watch','price':55,'description':'modern','image':'assets/images/smart watch.jpeg',},
+      ],},
+    {'name':'Clothes',
+      'image':'assets/images/tshirt.jpeg',
       'items':[
-        {'name': 'T-shirt','price':60,'description':'cotton'},
-        {'name':'jacket','price':45,'description':'comfy'},
-        {'name': 'jeans','price':55,'description':'regular fit'},
+        {'name': 'T-shirt','price':60,'description':'cotton','image':'assets/images/smart watch.jpeg',},
+        {'name':'jacket','price':45,'description':'comfy','image':'assets/images/jacket.jpeg',},
+        {'name': 'jeans','price':55,'description':'regular fit','image':'assets/images/jeans.jpeg',},
       ],
     }
   ];
   final List<Map<String,dynamic>> products =[
-    {'name':'air sneakers','price':49},
-    {'name':'leather jacket','price':49},
-    {'name':'classic watch','price':49},
-    {'name':'jeans','price':49},
-    {'name':'running shoes','price':49},
-    {'name':'smart watch','price':49},
+    {'name':'air sneakers','price':49,'image':'assets/images/air sneakers.jpeg',},
+    {'name':'leather jacket','price':49,'image':'assets/images/leather jacket.jpeg',},
+    {'name':'classic watch','price':49,'image':'assets/images/classic watch.jpeg',},
+    {'name':'jeans','price':49,'image':'assets/images/jeans.jpeg',},
+    {'name':'running shoes','price':49,'image':'assets/images/running shoes.jpeg',},
+    {'name':'smart watch','price':49,'image':'assets/images/smart watch.jpeg',},
   ];
   @override
   Widget build(BuildContext context){
@@ -51,14 +56,21 @@ class HomePage extends StatelessWidget{
         foregroundColor: Colors.black,
         title: Row(
           children: [
-            Container(
-              width:38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(12),
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: (){
+                Navigator.pushNamed(context, ProfilePage.routeName, arguments: {'username':userName,'email':'dana@email.com'},);
+              },
+              child: Container(
+                margin: const EdgeInsets.only(right: 16),
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.person,color: Colors.white),
               ),
-              child: const Icon(Icons.person, color:Colors.white),
             ),
             const SizedBox(width:12),
             Column(
@@ -165,7 +177,10 @@ class HomePage extends StatelessWidget{
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.category,size: 18),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.asset(category['image'],width: 22,height: 22,fit: BoxFit.cover,),
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     category['name'],
@@ -200,15 +215,17 @@ class HomePage extends StatelessWidget{
           children: [
             Expanded(child: Container(
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
-                borderRadius: BorderRadius.circular(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+
+                child:ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Image.asset(product['image'],fit: BoxFit.cover,),
+                )
               ),
-              child: const Center(
-                child: Icon(Icons.image,size: 42,color: Colors.black38),
               ),
-              ),
-            ),
             const SizedBox(height: 10),
             Text(
               product['name'],

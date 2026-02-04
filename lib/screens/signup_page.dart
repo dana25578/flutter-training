@@ -30,73 +30,109 @@ class _SignupPageState extends State<SignupPage>{
     super.dispose();
   }
   @override
-  Widget build(BuildContext context){
+  Widget build (BuildContext context){
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F7FB),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                SizedBox(height: 20),
-                Text(
-                  'Sign up',
-                  style:TextStyle(color:Colors.blue,fontSize: 26, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 30),
-                TextFormField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Full name',
-                    border: OutlineInputBorder(),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              const SizedBox(height: 30),
+              Row(
+                children: [
+                  Container(width: 38,height: 38,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.person_add,color: Colors.white),
                   ),
-                  validator: (value){
-                    if (value==null|| value.isEmpty){
-                      return 'Name is required';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'dana@abc.com',
-                    border: OutlineInputBorder(),
+                  const SizedBox(width: 12),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Create account",style: TextStyle(fontSize: 12,color: Colors.black54),
+                      ),
+                      Text("Sign up", style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,
+                      ),
+                      ),
+                    ],
                   ),
-                  validator: (value){
-                    if(value==null||value.isEmpty){
-                      return 'Email is required';
-                    }
-                    return null;
-                  },
+                ],
+              ),
+              const SizedBox(height: 30),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _hidePassword,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Full name',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _hidePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          border: const OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _hidePassword?Icons.visibility_off:Icons.visibility,
+                            ),
+                            onPressed: (){
+                              setState(() {
+                                _hidePassword=!_hidePassword;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: signup, child: const Text('Create account'),
+                        ),
+                      ),
+                    ],
                   ),
-                  validator: (value){
-                    if (value==null||value.length<6){
-                      return 'minimum 6 characters';
-                    }
-                    return null;
-                  },
                 ),
-                SizedBox(height: 20),
-                ElevatedButton(onPressed: signup, child: Text('Create account'),
-                ),
-                TextButton(onPressed: (){
-                  Navigator.pushReplacementNamed(context, LoginPage.routeName);
-                }, child: Text('Already have an account? Login'),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

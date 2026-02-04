@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'screens/login_page.dart';
 import 'screens/signup_page.dart';
 import 'screens/home_page.dart';
+import 'screens/profile_page.dart';
 void main(){
   runApp (MyApp());
 }
@@ -25,6 +26,12 @@ class MyApp extends StatelessWidget {
         },
         CategoryItemsPage.routeName:(context){
           return CategoryItemsPage();
+        },
+        ProfilePage.routeName:(context){
+          final args=ModalRoute.of(context)!.settings.arguments as Map<String,dynamic>?;
+          final String username=(args?['username']??'User') as String;
+          final String email=(args?['email']??'user@email.com') as String;
+          return ProfilePage(username: username, email: email);
         },
       },
     );

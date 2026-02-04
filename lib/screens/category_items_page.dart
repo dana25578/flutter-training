@@ -33,19 +33,15 @@ class CategoryItemsPage extends StatelessWidget{
               ],
             ),
             child: ListTile(
-              contentPadding: const EdgeInsets.all(12),
-              leading: Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(Icons.image,color: Colors.black38),
+              contentPadding: const EdgeInsets.symmetric(vertical: 8,horizontal: 12),
+                  leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+
+                  child: Image.asset(item['image'],width: 52,height: 52,fit: BoxFit.cover,)
               ),
               title: Text(
                 item['name'],
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 4),
