@@ -2,6 +2,8 @@ import 'package:app/screens/category_items_page.dart';
 import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'profile_page.dart';
+import '../services/cart_service.dart';
+import 'basket_page.dart';
 
 class HomePage extends StatelessWidget{
   static const String routeName='/home';
@@ -32,7 +34,7 @@ class HomePage extends StatelessWidget{
     {'name':'Clothes',
       'image':'assets/images/tshirt.jpeg',
       'items':[
-        {'name': 'T-shirt','price':60,'description':'cotton','image':'assets/images/smart watch.jpeg',},
+        {'name': 'T-shirt','price':60,'description':'cotton','image':'assets/images/tshirt.jpeg',},
         {'name':'jacket','price':45,'description':'comfy','image':'assets/images/jacket.jpeg',},
         {'name': 'jeans','price':55,'description':'regular fit','image':'assets/images/jeans.jpeg',},
       ],
@@ -87,6 +89,9 @@ class HomePage extends StatelessWidget{
           ],
         ),
         actions: [
+          IconButton(onPressed: (){
+            Navigator.pushNamed(context, BasketPage.routeName);
+          }, icon: Icon (Icons.shopping_basket_outlined),),
           IconButton(
               icon:const Icon(Icons.logout),
               onPressed: (){
@@ -235,6 +240,29 @@ class HomePage extends StatelessWidget{
             ),
             const SizedBox(height: 6),
             Text('\$${product['price']}', style: const TextStyle(fontWeight: FontWeight.bold),
+
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height:38,
+              child:ElevatedButton(
+                onPressed: (){
+                  CartService.instance.addProduct(product);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF111827),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Add to cart',style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+                ),
+                ),
+              ),
             ),
           ],
         ),

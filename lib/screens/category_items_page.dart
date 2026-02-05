@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../services/cart_service.dart';
+import 'basket_page.dart';
 class CategoryItemsPage extends StatelessWidget{
   static const String routeName='/category-items';
 
@@ -14,6 +16,12 @@ class CategoryItemsPage extends StatelessWidget{
         foregroundColor: Colors.black,
         elevation: 0,
         title: Text(categoryName),
+        actions: [
+          IconButton(onPressed: (){
+            Navigator.pushNamed(context, BasketPage.routeName);
+          }, icon: const Icon(Icons.shopping_basket_outlined),
+          ),
+        ],
       ),
       body: ListView.builder(padding: const EdgeInsets.all(16),
         itemCount: items.length,
@@ -47,14 +55,38 @@ class CategoryItemsPage extends StatelessWidget{
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(item['description']),
               ),
-              trailing: Text(
-                  '\$${item['price']}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  )
+              trailing: SizedBox(
+                width: 125,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text('\$${item['price']}',style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF111827),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.add_shopping_cart,color:Colors.white,size: 18),
+                        onPressed: (){
+                          CartService.instance.addProduct({
+                            'name':item['name'],
+                            'price':item['price'],
+                            'image':item['image'],
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              ),
+
           );
         },
       ),
