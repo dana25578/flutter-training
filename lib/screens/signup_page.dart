@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'home_page.dart';
+import '../services/auth_service.dart';
 class SignupPage extends StatefulWidget{
   static const String routeName='/signup';
   @override
@@ -17,9 +18,21 @@ class _SignupPageState extends State<SignupPage>{
   bool isValidEmail(String email){
     return email.contains('@') && email.contains('.');
   }
-  void signup(){
-    if (_formKey.currentState!.validate()){
-      Navigator.pushReplacementNamed(context, HomePage.routeName);
+  Future<void> signup() async{
+    if(!_formKey.currentState!.validate()) return;
+    final username=_nameController.text.trim();
+    final email=_emailController.text.trim();
+    final password=_passwordController.text;
+    try{
+      final result=await AuthService.register(username, email, password);
+      if (result["success"]==true){
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result["message"]??"Account created")),);
+        Navigator.pushReplacementNamed(context, LoginPage.routeName);
+      }else{
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result["message"]??"Signup failed")),);
+      }
+    }catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Connection error:$e")),);
     }
   }
   @override

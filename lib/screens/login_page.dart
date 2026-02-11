@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'signup_page.dart';
 import 'home_page.dart';
+import '../services/auth_service.dart';
 class LoginPage extends StatefulWidget{
   static const String routeName='/login';
   @override
@@ -16,9 +17,17 @@ class _LoginPageState extends State<LoginPage>{
   bool isValidEmail(String email){
     return email.contains('@') && email.contains('.');
   }
-  void login(){
-    if (_formkey.currentState!.validate()){
+  Future<void> login() async {
+    if (!_formkey.currentState!.validate()) return;
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final result=await AuthService.login(email, password);
+    print("Login result:$result");
+    final bool success=result["success"]==true;
+    if(success){
       Navigator.pushReplacementNamed(context, HomePage.routeName);
+    }else{
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result["message"]?.toString()??"Login failed"),),);
     }
   }
   @override
