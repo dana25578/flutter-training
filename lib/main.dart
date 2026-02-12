@@ -30,9 +30,10 @@ class MyApp extends StatelessWidget {
         },
         ProfilePage.routeName:(context){
           final args=ModalRoute.of(context)!.settings.arguments as Map<String,dynamic>?;
+          final int id=(args?['id']??0) as int;
           final String username=(args?['username']??'User') as String;
           final String email=(args?['email']??'user@email.com') as String;
-          return ProfilePage(username: username, email: email);
+          return ProfilePage(id:id,username: username, email: email);
         },
         BasketPage.routeName:(context){
           return BasketPage();

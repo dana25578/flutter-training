@@ -1,11 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../services/user_service.dart';
+import '../services/session_service.dart';
 class ProfilePage extends StatefulWidget{
   static const String routeName='/profile';
+  final int id;
   final String username;
   final String email;
   const ProfilePage({super.key,
+    required this.id,
     required this.username,
     required this.email,
   });
@@ -65,9 +69,25 @@ class _ProfilePageState extends State<ProfilePage>{
       border: const OutlineInputBorder(),
     );
   }
-  void _save(){
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile saved (local)')),
-    );
+  Future<void> _save() async{
+    final newUsername=_usernameController.text.trim();
+    final newEmail=_emailController.text.trim();
+    if(newUsername.isEmpty|| newEmail.isEmpty){
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("username and email are required")),);
+      return;
+    }
+    try{
+      final updated=await UserService.updateUser(id: widget.id, username: newUsername, email: newEmail);
+      final current=SessionService.currentUser.value;
+      if (current!=null){
+        current.username=updated["username"]??current.username;
+        current.email=updated["email"]?? current.email;
+        SessionService.currentUser.value=current;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("profile updated successfully")),);
+    }catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("update failed:$e")),);
+    }
   }
   @override
   Widget build(BuildContext context){
@@ -102,7 +122,7 @@ class _ProfilePageState extends State<ProfilePage>{
                     decoration: _input('Username'),
                   ),
                   const SizedBox(height: 12),
-                  TextField(controller: _emailController,decoration: _input('Email'),readOnly: true,),
+                  TextField(controller: _emailController,decoration: _input('Email'),),
                 ],
               ),
               ),

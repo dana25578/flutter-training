@@ -4,11 +4,10 @@ import 'login_page.dart';
 import 'profile_page.dart';
 import '../services/cart_service.dart';
 import 'basket_page.dart';
-
+import '../services/session_service.dart';
 class HomePage extends StatelessWidget{
   static const String routeName='/home';
   HomePage ({super.key});
-  final String userName='dana';
   final List<Map<String,dynamic>> categories=[
     { 'name':'Shoes',
       'image':'assets/images/sneakers.webp',
@@ -61,7 +60,8 @@ class HomePage extends StatelessWidget{
             InkWell(
               borderRadius: BorderRadius.circular(12),
               onTap: (){
-                Navigator.pushNamed(context, ProfilePage.routeName, arguments: {'username':userName,'email':'dana@email.com'},);
+                final user=SessionService.currentUser.value;
+                Navigator.pushNamed(context, ProfilePage.routeName,arguments: {'id':user?.id,'username':user?.username??'User','email':user?.email?? 'user@gmail.com',},);
               },
               child: Container(
                 margin: const EdgeInsets.only(right: 16),
@@ -80,9 +80,10 @@ class HomePage extends StatelessWidget{
               children: [
                 const Text('Welcome', style: TextStyle(fontSize: 12,color: Colors.black54),
                 ),
-                Text(
-                  userName, style: const TextStyle(fontSize: 16,fontWeight: FontWeight.bold,
-                  ),
+                ValueListenableBuilder(valueListenable: SessionService.currentUser, builder: (context,user, _){
+                  final name=user?.username??'User';
+                  return Text(name, style:const TextStyle(fontSize: 16,fontWeight: FontWeight.bold,),);
+                },
                 ),
               ],
             )
@@ -95,6 +96,7 @@ class HomePage extends StatelessWidget{
           IconButton(
               icon:const Icon(Icons.logout),
               onPressed: (){
+                SessionService.clear();
                 Navigator.pushReplacementNamed(context, LoginPage.routeName);
               },
           ),

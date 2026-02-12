@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'signup_page.dart';
 import 'home_page.dart';
 import '../services/auth_service.dart';
+import '../models/app_user.dart';
+import '../services/session_service.dart';
 class LoginPage extends StatefulWidget{
   static const String routeName='/login';
   @override
@@ -25,6 +27,8 @@ class _LoginPageState extends State<LoginPage>{
     print("Login result:$result");
     final bool success=result["success"]==true;
     if(success){
+      final user=AppUser.fromJson(result);
+      SessionService.setUser(user);
       Navigator.pushReplacementNamed(context, HomePage.routeName);
     }else{
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result["message"]?.toString()??"Login failed"),),);
