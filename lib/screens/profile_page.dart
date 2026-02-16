@@ -29,6 +29,9 @@ class _ProfilePageState extends State<ProfilePage>{
     super.initState();
     _usernameController=TextEditingController(text: widget.username);
     _emailController=TextEditingController(text: widget.email);
+    final current=SessionService.currentUser.value;
+    _phoneController.text=current?.phoneNumber ?? '';
+    _addressController.text=current?.address ??'';
   }
   @override
   void dispose(){
@@ -72,16 +75,24 @@ class _ProfilePageState extends State<ProfilePage>{
   Future<void> _save() async{
     final newUsername=_usernameController.text.trim();
     final newEmail=_emailController.text.trim();
+    final newPhone=_phoneController.text.trim();
+    final newAddress=_addressController.text.trim();
     if(newUsername.isEmpty|| newEmail.isEmpty){
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("username and email are required")),);
       return;
     }
+    if(newPhone.isEmpty){
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("phone number is required")),);
+      return;
+    }
     try{
-      final updated=await UserService.updateUser(id: widget.id, username: newUsername, email: newEmail);
+      final updated=await UserService.updateUser(id: widget.id, username: newUsername, email: newEmail,phoneNumber:newPhone,address:newAddress);
       final current=SessionService.currentUser.value;
       if (current!=null){
         current.username=updated["username"]??current.username;
         current.email=updated["email"]?? current.email;
+        current.phoneNumber=updated["phoneNumber"]?? current.phoneNumber;
+        current.address=updated["address"]??current.address;
         SessionService.currentUser.value=current;
       }
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("profile updated successfully")),);

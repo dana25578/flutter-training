@@ -6,8 +6,10 @@ class UserService{
     required int id,
     required String username,
     required String email,
+    required String phoneNumber,
+    required String address,
   })async{
-    final res=await http.put(Uri.parse("$baseUrl/api/users/$id"),headers:{"Content-Type":"application/json"},body:jsonEncode({"username":username,"email":email,}),);
+    final res=await http.put(Uri.parse("$baseUrl/api/users/$id"),headers:{"Content-Type":"application/json"},body:jsonEncode({"username":username,"email":email,"phoneNumber":phoneNumber,"address":address,}),);
     if (res.body.isEmpty){
       throw Exception("empty response");
     }

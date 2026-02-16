@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage>{
                   Container(width: 38, height: 38,
                     decoration: BoxDecoration(
                       color: Colors.black,
-                      borderRadius: BorderRadius.circular(12),
+                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.person,color: Colors.white),
                   ),

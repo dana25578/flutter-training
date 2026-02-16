@@ -1,7 +1,9 @@
+import 'package:app/services/session_service.dart';
 import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'home_page.dart';
 import '../services/auth_service.dart';
+import 'package:app/models/app_user.dart';
 class SignupPage extends StatefulWidget{
   static const String routeName='/signup';
   @override
@@ -14,6 +16,7 @@ class _SignupPageState extends State<SignupPage>{
   final TextEditingController _nameController=TextEditingController();
   final TextEditingController _emailController=TextEditingController();
   final TextEditingController _passwordController=TextEditingController();
+  final TextEditingController _phoneController=TextEditingController();
   bool _hidePassword=true;
   bool isValidEmail(String email){
     return email.contains('@') && email.contains('.');
@@ -23,11 +26,14 @@ class _SignupPageState extends State<SignupPage>{
     final username=_nameController.text.trim();
     final email=_emailController.text.trim();
     final password=_passwordController.text;
+    final phone= _phoneController.text.trim();
     try{
-      final result=await AuthService.register(username, email, password);
+      final result=await AuthService.register(username, email, password,phone);
       if (result["success"]==true){
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result["message"]??"Account created")),);
-        Navigator.pushReplacementNamed(context, LoginPage.routeName);
+        final user= AppUser.fromJson(result);
+        SessionService.setUser(user);
+        Navigator.pushReplacementNamed(context, HomePage.routeName);
       }else{
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result["message"]??"Signup failed")),);
       }
@@ -125,6 +131,12 @@ class _SignupPageState extends State<SignupPage>{
                             },
                           ),
                         ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(labelText: "Phone Number",border: const OutlineInputBorder(),),
                       ),
                       const SizedBox(height: 20),
                       SizedBox(
