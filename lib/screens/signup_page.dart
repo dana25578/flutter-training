@@ -104,6 +104,10 @@ class _SignupPageState extends State<SignupPage>{
                           labelText: 'Full name',
                           border: OutlineInputBorder(),
                         ),
+                        validator: (v){
+                          if (v==null||v.trim().isEmpty) return "name is required";
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -112,6 +116,11 @@ class _SignupPageState extends State<SignupPage>{
                           labelText: 'Email',
                           border: OutlineInputBorder(),
                         ),
+                        validator: (v){
+                          if(v==null||v.trim().isEmpty) return "email is required";
+                          if(!isValidEmail(v.trim())) return "enter a valid email";
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -131,12 +140,22 @@ class _SignupPageState extends State<SignupPage>{
                             },
                           ),
                         ),
+                        validator: (v){
+                          if(v==null|| v.length<6) return "minimum 6 characters";
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
                         decoration: const InputDecoration(labelText: "Phone Number",border: const OutlineInputBorder(),),
+                        validator: (v){
+                          if (v==null||v.trim().isEmpty) return "phone number is required";
+                          if (v.length<7) return "minimum 7 digits";
+                          if (!RegExp(r'^[0-9]+$').hasMatch(v)) return "enter a valid phone number";
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 20),
                       SizedBox(
