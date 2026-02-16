@@ -132,20 +132,13 @@ class _ProfilePageState extends State<ProfilePage>{
                     controller:_usernameController,
                     decoration: _input('Username'),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   TextField(controller: _emailController,decoration: _input('Email'),),
-                ],
-              ),
-              ),
-              const SizedBox(height: 14),
-              _card(Column(
-                children: [
-                  TextField(
-                    controller: _phoneController,
+                  const SizedBox(height: 16),
+                  TextField(controller: _phoneController,
                     decoration: _input('Phone'),
-                    keyboardType: TextInputType.phone,
-                  ),
-                  const SizedBox(height: 12),
+                    keyboardType: TextInputType.phone,),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: _addressController,
                     decoration: _input('Adress'),

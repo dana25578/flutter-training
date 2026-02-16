@@ -5,6 +5,7 @@ import 'screens/signup_page.dart';
 import 'screens/home_page.dart';
 import 'screens/profile_page.dart';
 import 'screens/basket_page.dart';
+import 'screens/checkout_page.dart';
 void main(){
   runApp (MyApp());
 }
@@ -38,6 +39,9 @@ class MyApp extends StatelessWidget {
         BasketPage.routeName:(context){
           return BasketPage();
         },
+        CheckoutPage.routeName:(context){
+          return const CheckoutPage();
+        }
       },
     );
   }
