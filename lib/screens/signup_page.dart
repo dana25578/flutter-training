@@ -18,11 +18,16 @@ class _SignupPageState extends State<SignupPage>{
   final TextEditingController _passwordController=TextEditingController();
   final TextEditingController _phoneController=TextEditingController();
   bool _hidePassword=true;
+  bool _isLoading=false;
   bool isValidEmail(String email){
     return email.contains('@') && email.contains('.');
   }
   Future<void> signup() async{
+    if(_isLoading) return;
     if(!_formKey.currentState!.validate()) return;
+    setState(() {
+      _isLoading=true;
+    });
     final username=_nameController.text.trim();
     final email=_emailController.text.trim();
     final password=_passwordController.text;
@@ -39,6 +44,10 @@ class _SignupPageState extends State<SignupPage>{
       }
     }catch(e){
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Connection error:$e")),);
+    }finally{
+      setState(() {
+        _isLoading=false;
+      });
     }
   }
   @override
@@ -169,7 +178,8 @@ class _SignupPageState extends State<SignupPage>{
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          onPressed: signup, child: const Text('Create account'),
+                          onPressed: _isLoading?null:signup,
+                          child: _isLoading?const SizedBox(width: 22,height: 22,child: CircularProgressIndicator(strokeWidth: 2),):const Text('Create account'),
                         ),
                       ),
                     ],
