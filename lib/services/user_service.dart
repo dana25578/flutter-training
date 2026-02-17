@@ -18,4 +18,14 @@ class UserService{
     }
     return jsonDecode(res.body) as Map<String,dynamic>;
   }
+  static Future<Map<String,dynamic>> getUserById(int id) async{
+    final res=await http.get(Uri.parse("$baseUrl/api/users/$id"),headers: {"Content-Type":"application/json"},);
+    if(res.body.isEmpty){
+      throw Exception("empty respons");
+    }
+    if(res.statusCode<200||res.statusCode>=300){
+      throw Exception(res.body);
+    }
+    return jsonDecode(res.body) as Map<String,dynamic>;
+  }
 }

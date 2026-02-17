@@ -19,6 +19,8 @@ class ProfilePage extends StatefulWidget{
   }
 }
 class _ProfilePageState extends State<ProfilePage>{
+  bool _loading=true;
+  String? _loadError;
   File? _profileImage;
   late final TextEditingController _usernameController;
   late final TextEditingController _emailController;
@@ -29,9 +31,9 @@ class _ProfilePageState extends State<ProfilePage>{
     super.initState();
     _usernameController=TextEditingController(text: widget.username);
     _emailController=TextEditingController(text: widget.email);
-    final current=SessionService.currentUser.value;
-    _phoneController.text=current?.phoneNumber ?? '';
-    _addressController.text=current?.address ??'';
+    _phoneController.text="";
+    _addressController.text="";
+    _loadUser();
   }
   @override
   void dispose(){
@@ -47,6 +49,31 @@ class _ProfilePageState extends State<ProfilePage>{
     if (file==null) return;
     setState(() {
       _profileImage=File(file.path);
+    });
+  }
+  Future<void> _loadUser() async{
+    setState(() {
+      _loading=true;
+      _loadError=null;
+    });
+    try{
+      final data=await UserService.getUserById(widget.id);
+      _usernameController.text=(data["username"]??"").toString();
+      _emailController.text=(data["email"]??"").toString();
+      _phoneController.text=(data["phoneNumber"]??"").toString();
+      _addressController.text=(data["address"]??"").toString();
+      final current =SessionService.currentUser.value;
+      if (current!=null && current.id==widget.id){
+        current.username=_usernameController.text;
+        current.email=_emailController.text;
+        current.phoneNumber=_phoneController.text;
+        current.address=_addressController.text;
+        SessionService.currentUser.value=current;
+      }
+    }catch(e){
+      _loadError=e.toString();
+    }setState(() {
+      _loading=false;
     });
   }
   Widget _card(Widget child){
@@ -94,6 +121,7 @@ class _ProfilePageState extends State<ProfilePage>{
         current.phoneNumber=updated["phoneNumber"]?? current.phoneNumber;
         current.address=updated["address"]??current.address;
         SessionService.currentUser.value=current;
+        SessionService.currentUser.notifyListeners();
       }
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("profile updated successfully")),);
     }catch(e){
@@ -111,59 +139,57 @@ class _ProfilePageState extends State<ProfilePage>{
         title: const Text('Profile'),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: _loading
+            ?const Center(child: CircularProgressIndicator())
+            :(_loadError!=null ? Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [Text("failed to load profile:\n$_loadError"),
+              const SizedBox(height: 12),
+                ElevatedButton(onPressed: _loadUser, child: const Text("retry"),
+                ),
+              ],
+            ),
+          ),
+        )
+        :SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              _card(Column(
-                children: [
-                  GestureDetector(
-                    onTap: _pickImage, child: CircleAvatar(
-                    radius: 46,
-                    backgroundColor: const Color(0xFFF1F5F9),
-                    backgroundImage: _profileImage!=null? FileImage(_profileImage!):null,
-                    child: _profileImage==null?const Icon(Icons.camera_alt,color:Colors.black54):null,
-                  ),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text('Tap to change photo', style: TextStyle(fontSize: 12,color: Colors.black54),),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller:_usernameController,
-                    decoration: _input('Username'),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(controller: _emailController,decoration: _input('Email'),),
-                  const SizedBox(height: 16),
-                  TextField(controller: _phoneController,
-                    decoration: _input('Phone'),
-                    keyboardType: TextInputType.phone,),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _addressController,
-                    decoration: _input('Adress'),
-                  ),
-                ],
+              _card(Column(children: [GestureDetector(onTap: _pickImage,child: CircleAvatar(
+                radius: 46,
+                backgroundColor: const Color(0xFFF1F5F9),
+                backgroundImage: _profileImage!=null?FileImage(_profileImage!):null,
+                child: _profileImage==null?const Icon(Icons.camera_alt,color: Colors.black54):null,
+              ),
+              ),
+                const SizedBox(height: 10),
+                const Text('Tap to change photo',style: TextStyle(fontSize: 12,color: Colors.black54),),
+                const SizedBox(height: 16),
+                TextField(controller: _usernameController,decoration: _input('username'),),
+                const SizedBox(height: 16),
+                TextField(controller: _emailController,decoration: _input('email'),),
+                const SizedBox(height:16),
+                TextField(controller: _phoneController,decoration: _input('phone'),keyboardType: TextInputType.phone,),
+                const SizedBox(height: 16),
+                TextField(controller: _addressController,decoration: _input('address'),),
+              ],
               ),
               ),
               const SizedBox(height: 14),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: _save,
-                  child: const Text ('Save'),
-                ),
-              )
+              SizedBox(width: double.infinity,height: 48,child: ElevatedButton(style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),),
+              ), onPressed: _save,
+                child: const Text('save'),
+              ),
+              ),
             ],
           ),
+        )
         ),
       ),
     );
