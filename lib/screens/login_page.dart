@@ -16,24 +16,37 @@ class _LoginPageState extends State<LoginPage>{
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController =TextEditingController();
   bool _hidePassword = true;
+  bool _isLoading=false;
   bool isValidEmail(String email){
     return email.contains('@') && email.contains('.');
   }
   Future<void> login() async {
+    if (_isLoading) return;
     if (!_formkey.currentState!.validate()) return;
+    setState(() {
+      _isLoading=true;
+    });
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-    final result=await AuthService.login(email, password);
-    print("Login result:$result");
-    final bool success=result["success"]==true;
-    if(success){
-      final user=AppUser.fromJson(result);
-      SessionService.setUser(user);
-      Navigator.pushReplacementNamed(context, HomePage.routeName);
-    }else{
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result["message"]?.toString()??"Login failed"),),);
+    try{
+      final result=await AuthService.login(email, password);
+      print("Login result:$result");
+      final bool success=result["success"]==true;
+      if(success){
+        final user=AppUser.fromJson(result);
+        SessionService.setUser(user);
+        Navigator.pushReplacementNamed(context, HomePage.routeName);
+      }else{
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result["message"]?.toString()??"Login failed"),),);
+      }
+    }catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Connection error:$e")),);
+    }finally{
+      setState(() {
+        _isLoading=false;
+      });
     }
-  }
+    }
   @override
   void dispose(){
     _emailController.dispose();
@@ -141,7 +154,8 @@ class _LoginPageState extends State<LoginPage>{
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          onPressed: login,child: const Text('Login'),
+                          onPressed: _isLoading?null:login,
+                          child: _isLoading?const SizedBox(width: 22,height: 22, child: CircularProgressIndicator(strokeWidth: 2),):const Text('Login'),
                         ),
                       ),
                       const SizedBox(height: 10),
