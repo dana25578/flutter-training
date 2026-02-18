@@ -5,40 +5,15 @@ import 'profile_page.dart';
 import '../services/cart_service.dart';
 import 'basket_page.dart';
 import '../services/session_service.dart';
-class HomePage extends StatelessWidget{
-  static const String routeName='/home';
-  HomePage ({super.key});
-  final List<Map<String,dynamic>> categories=[
-    { 'name':'Shoes',
-      'image':'assets/images/sneakers.webp',
-      'items':[
-        {'name': 'Running Shoes','price':60,'description':'comfortable','image':'assets/images/running shoes.jpeg',},
-        {'name':'Sneakers','price':45,'description':'casual style','image':'assets/images/air sneakers.jpeg',},
-        {'name': 'Training Shoes','price':55,'description':'lightweight','image':'assets/images/training shoes.jpeg',},
-      ],},
-    { 'name':'Bags',
-      'image':'assets/images/backpack.jpeg',
-      'items':[
-        {'name': 'Backpack','price':60,'description':'for school','image':'assets/images/backpack.jpeg',},
-        {'name':'HandBag','price':45,'description':'daily use','image':'assets/images/handbag.webp',},
-        {'name': 'Travel bag','price':55,'description':'large capacity','image':'assets/images/travel bag.jpeg',},
-      ],},
-      {'name':'Watches',
-      'image':'assets/images/smart watch.jpeg',
-      'items':[
-        {'name': 'classic watch','price':60,'description':'elegant','image':'assets/images/classic watch.jpeg',},
-        {'name':'sport watch','price':45,'description':'waterproof','image':'assets/images/sport watch.jpeg',},
-        {'name': 'Smart watch','price':55,'description':'modern','image':'assets/images/smart watch.jpeg',},
-      ],},
-    {'name':'Clothes',
-      'image':'assets/images/tshirt.jpeg',
-      'items':[
-        {'name': 'T-shirt','price':60,'description':'cotton','image':'assets/images/tshirt.jpeg',},
-        {'name':'jacket','price':45,'description':'comfy','image':'assets/images/jacket.jpeg',},
-        {'name': 'jeans','price':55,'description':'regular fit','image':'assets/images/jeans.jpeg',},
-      ],
-    }
-  ];
+import '../services/category_service.dart';
+import '../models/category.dart';
+class HomePage extends StatelessWidget {
+  static const String routeName = '/home';
+
+  HomePage({super.key});
+
+
+
   final List<Map<String,dynamic>> products =[
     {'name':'air sneakers','price':49,'image':'assets/images/air sneakers.jpeg',},
     {'name':'leather jacket','price':49,'image':'assets/images/leather jacket.jpeg',},
@@ -139,11 +114,25 @@ class HomePage extends StatelessWidget{
           const Text('Categories',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: _buildCategories(context),
-            ),
+          FutureBuilder<List<Category>>(
+            future: CategoryService.getCategories(),
+            builder: (context,snapshot){
+              if(snapshot.connectionState==ConnectionState.waiting){
+                return const Padding(padding: EdgeInsets.all(12),child: Center(child:CircularProgressIndicator()),);
+              }
+              if(snapshot.hasError){
+              return Padding(padding:const EdgeInsets.all(12),child:Text("Failed to load categories:"+snapshot.error.toString()),);
+              }
+              final List<Category> categories=snapshot.data??[];
+              if(categories.isEmpty){
+                return const Padding(padding: EdgeInsets.all(12),child: Text("No categories found"),);
+              }
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(children: _buildCategoriesFromApi(context,categories),),
+              );
+            },
+
           ),
           const SizedBox(height:20),
           const  Text('Products',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),
@@ -159,48 +148,6 @@ class HomePage extends StatelessWidget{
         ],
       ),
     );
-  }
-  List<Widget> _buildCategories(BuildContext context){
-    List<Widget> widgets=[];
-    for(int i=0; i<categories.length;i++){
-      Map<String,dynamic> category = categories[i];
-      widgets.add(
-        Padding(padding: const EdgeInsets.only(right: 10),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: (){
-              Navigator.pushNamed(context, CategoryItemsPage.routeName,arguments: {
-                'categoryName':category['name'],
-                'items':category['items'],
-              },
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14,vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.black12),
-              ),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(category['image'],width: 22,height: 22,fit: BoxFit.cover,),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    category['name'],
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    return widgets;
   }
   Widget _buildProductCard(Map<String,dynamic> product){
     return Container(
@@ -270,5 +217,34 @@ class HomePage extends StatelessWidget{
         ),
       ),
     );
+  }
+  List<Widget> _buildCategoriesFromApi(BuildContext context,List<Category>categories){
+    final List<Widget> widgets=[];
+    for(int i=0;i<categories.length;i++){
+      final Category category=categories[i];
+      final String imagePath=category.imageUrl??"assets/images/placeholder.png";
+      widgets.add(Padding(padding: const EdgeInsets.only(right: 10),child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: (){
+          Navigator.pushNamed(context, CategoryItemsPage.routeName,arguments: {"categoryId":category.id,"categoryName":category.name});
+        },
+        child: Container(padding: const EdgeInsets.symmetric(horizontal: 14,vertical: 12),decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.black12),
+        ),child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.asset(imagePath,width: 22,height: 22,fit: BoxFit.cover,),
+            ),
+            const SizedBox(width: 8),
+            Text(category.name,style: const  TextStyle(fontWeight: FontWeight.w600),),
+          ],
+        ),
+        ),
+      ),),);
+    }
+    return widgets;
   }
 }
