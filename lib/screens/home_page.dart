@@ -7,21 +7,13 @@ import 'basket_page.dart';
 import '../services/session_service.dart';
 import '../services/category_service.dart';
 import '../models/category.dart';
+import '../models/product.dart';
+import '../services/product_service.dart';
 class HomePage extends StatelessWidget {
   static const String routeName = '/home';
 
   HomePage({super.key});
-
-
-
-  final List<Map<String,dynamic>> products =[
-    {'name':'air sneakers','price':49,'image':'assets/images/air sneakers.jpeg',},
-    {'name':'leather jacket','price':49,'image':'assets/images/leather jacket.jpeg',},
-    {'name':'classic watch','price':49,'image':'assets/images/classic watch.jpeg',},
-    {'name':'jeans','price':49,'image':'assets/images/jeans.jpeg',},
-    {'name':'running shoes','price':49,'image':'assets/images/running shoes.jpeg',},
-    {'name':'smart watch','price':49,'image':'assets/images/smart watch.jpeg',},
-  ];
+  
   @override
   Widget build(BuildContext context){
     return Scaffold(
@@ -36,6 +28,10 @@ class HomePage extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               onTap: (){
                 final user=SessionService.currentUser.value;
+                if(user==null){
+                  Navigator.pushReplacementNamed(context, LoginPage.routeName);
+                  return;
+                }
                 Navigator.pushNamed(context, ProfilePage.routeName,arguments: {'id':user?.id,'username':user?.username??'User','email':user?.email?? 'user@gmail.com',},);
               },
               child: Container(
@@ -138,83 +134,36 @@ class HomePage extends StatelessWidget {
           const  Text('Products',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          GridView.builder( itemCount: products.length,shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 0.75, crossAxisSpacing: 12, mainAxisSpacing: 12),
-              itemBuilder:(context,index){
-                Map<String,dynamic> product=products[index];
-                return _buildProductCard(product);
-              },
-          ),
-        ],
-      ),
-    );
-  }
-  Widget _buildProductCard(Map<String,dynamic> product){
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: Container(
-              width: double.infinity,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-
-                child:ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: Image.asset(product['image'],fit: BoxFit.cover,),
-                )
-              ),
-              ),
-            const SizedBox(height: 10),
-            Text(
-              product['name'],
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight:FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            Text('\$${product['price']}', style: const TextStyle(fontWeight: FontWeight.bold),
-
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              height:38,
-              child:ElevatedButton(
-                onPressed: (){
-                  CartService.instance.addProduct(product);
+          FutureBuilder<List<Product>>(
+            future: ProductService.getAllProducts(),builder: (context,snapshot){
+              if (snapshot.connectionState==ConnectionState.waiting){
+                return const Padding(padding: EdgeInsets.all(12),
+                  child: Center(child:CircularProgressIndicator()),
+                );
+              }
+              if(snapshot.hasError){
+                return Padding(padding: const EdgeInsets.all(12),
+                  child: Text("Failed to load products:${snapshot.error}"),
+                );
+              }
+              final products=snapshot.data??[];
+              if (products.isEmpty){
+                return const Padding(padding: EdgeInsets.all(12),
+                  child: Text("no products found"),
+                );
+              }
+              return GridView.builder(
+                itemCount: products.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2,childAspectRatio: 0.65,crossAxisSpacing: 12,mainAxisSpacing: 12,),
+                itemBuilder: (context,index){
+                  return _buildProductCardFromApi(products[index]);
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF111827),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Add to cart',style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
-                ),
-                ),
-              ),
-            ),
-          ],
-        ),
+              );
+          },
+          )
+        ],
       ),
     );
   }
@@ -246,5 +195,60 @@ class HomePage extends StatelessWidget {
       ),),);
     }
     return widgets;
+  }
+  Widget _buildProductCardFromApi(Product product){
+    final imagePath=product.imageUrl?? "assets/images/placeholder.png";
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow:[
+          BoxShadow(color: Colors.black.withOpacity(0.06),blurRadius: 12,offset: const Offset(0, 8),),
+        ]
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                width: double.infinity,
+                child: Image.asset(imagePath,fit: BoxFit.contain,),
+              ),
+            ),
+            ),
+            const SizedBox(height: 10),
+            Text(product.name,maxLines: 1,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.bold),),
+            const SizedBox(height: 4),
+            Text(product.description??"",maxLines: 1,overflow:TextOverflow.ellipsis,style: const TextStyle(color: Colors.black54,fontSize: 12)),
+            const SizedBox(height: 6),
+            Text("\$${product.price.toStringAsFixed(0)}",style: const TextStyle(fontWeight:FontWeight.bold)),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 38,
+              child: ElevatedButton(
+                onPressed: (){
+                  CartService.instance.addProduct({
+                    "name":product.name,
+                    "price":product.price,
+                    "image":imagePath,
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF111827),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),),
+                ),
+                child: const Text("Add to cart", style: TextStyle(fontSize: 13,fontWeight:FontWeight.w600)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
