@@ -19,13 +19,14 @@ class CartService{
     return total;
   }
   void addProduct(Map<String,dynamic>product){
-    final List <CartItem> items=List.from(cart.value);
-    final int index =items.indexWhere((item) => item.name==product['name']);
-    if (index==-1){
-      items.add(CartItem(name: product['name'], price:product['price'].toDouble(), image: product['image']),);
+    final List<CartItem> items=List.from(cart.value);
+    final int pid=product["id"]as int;
+    final int index=items.indexWhere((item) =>item.productId==pid );
+    if(index==-1){
+      items.add(CartItem(productId: pid, name: product['name'], price: (product['price']as num).toDouble(), image: product['image'],));
     }else{
       items[index]=items[index].copyWith(
-        quantity: items[index].quantity+1,
+        quantity:items[index].quantity+1,
       );
     }
     cart.value=items;

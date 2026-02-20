@@ -5,6 +5,7 @@ import '../models/cart_item.dart';
 import 'login_page.dart';
 import 'profile_page.dart';
 import 'home_page.dart';
+import '../services/order_service.dart';
 class CheckoutPage extends StatelessWidget{
   static const String routeName='/checkout';
   const CheckoutPage({super.key});
@@ -107,10 +108,34 @@ class CheckoutPage extends StatelessWidget{
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-                onPressed: (){
-                CartService.instance.cart.value=[];
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Order placed")),);
-                Navigator.pushReplacementNamed(context, HomePage.routeName);
+                onPressed: () async{
+                  final user=SessionService.currentUser.value;
+                  if(user==null){
+                    Navigator.pushReplacementNamed(context, LoginPage.routeName);
+                    return;
+                  }
+                  final address=(user.address??'').trim();
+                  if(address.isEmpty){
+                    Navigator.pushReplacementNamed(context, ProfilePage.routeName,arguments:{"id": user.id,"username": user.username,"email": user.email,});
+                    return;
+                  }
+                  final items=List<CartItem>.from(CartService.instance.cart.value);
+                  if (items.isEmpty){
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Your basket is empty")),);
+                    return;
+                  }
+                  try{
+                    final result=await OrderService.createOrder(
+                      userId:user.id,
+                      address:address,
+                      items:items,
+                    );
+                    CartService.instance.cart.value=[];
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("order placed")),);
+                    Navigator.pushReplacementNamed(context, HomePage.routeName);
+                  }catch(e){
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("failed to plave order:$e")),);
+                  }
                 },
                 child: const Text("Place order"),
               ),

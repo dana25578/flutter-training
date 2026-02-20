@@ -105,6 +105,7 @@ class CategoryItemsPage extends StatelessWidget{
                             ),
                             onPressed: (){
                               CartService.instance.addProduct({
+                                "id":product.id,
                                 'name':product.name,
                                 'price':product.price,
                                 'image':imagePath,
