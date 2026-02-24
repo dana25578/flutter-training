@@ -6,6 +6,7 @@ import 'login_page.dart';
 import 'profile_page.dart';
 import 'home_page.dart';
 import '../services/order_service.dart';
+import '../services/auth_service.dart';
 class CheckoutPage extends StatelessWidget{
   static const String routeName='/checkout';
   const CheckoutPage({super.key});
@@ -170,7 +171,12 @@ class CheckoutPage extends StatelessWidget{
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(item.image,width: 60,height: 60,fit: BoxFit.cover,),
+            child: Image.network(
+              "${AuthService.baseUrl}${item.image}",
+              height: 60,
+              width: 60,
+              fit: BoxFit.cover,
+            ),
           ),
           const SizedBox(width: 12),
          Expanded(child: Column(

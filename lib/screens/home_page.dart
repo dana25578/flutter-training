@@ -9,6 +9,7 @@ import '../services/category_service.dart';
 import '../models/category.dart';
 import '../models/product.dart';
 import '../services/product_service.dart';
+import '../services/auth_service.dart';
 class HomePage extends StatelessWidget {
   static const String routeName = '/home';
 
@@ -215,7 +216,12 @@ class HomePage extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               child: Container(
                 width: double.infinity,
-                child: Image.asset(imagePath,fit: BoxFit.contain,),
+                child: Image.network(
+                  "${AuthService.baseUrl}${product.imageUrl}",
+                  height: 120,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             ),

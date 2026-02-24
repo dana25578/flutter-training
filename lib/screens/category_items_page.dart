@@ -3,6 +3,7 @@ import 'package:app/services/cart_service.dart';
 import 'package:app/services/product_service.dart';
 import 'package:flutter/material.dart';
 import 'basket_page.dart';
+import '../services/auth_service.dart';
 class CategoryItemsPage extends StatelessWidget{
   static const String routeName='/category-items';
   const CategoryItemsPage({super.key});
@@ -69,7 +70,12 @@ class CategoryItemsPage extends StatelessWidget{
                       width: 52,
                       height: 52,
                       color: const Color(0xFFF3F4F6),
-                      child: Image.asset(imagePath,fit: BoxFit.cover,),
+                      child: Image.network(
+                        "${AuthService.baseUrl}${product.imageUrl}",
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   title: Text(
