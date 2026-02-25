@@ -10,5 +10,13 @@ class AuthService{
     final res= await http.post(Uri.parse("$baseUrl/api/auth/register"),headers: {"Content-Type":"application/json"},body: jsonEncode({"username":username,"email":email,"password":password,"phoneNumber":phoneNumber,}),);
     return jsonDecode(res.body) as Map<String,dynamic>;
   }
-
+  static Future<Map<String,dynamic>> verifyOtp(String email,String code) async{
+    final res=await http.post(
+      Uri.parse("$baseUrl/api/auth/verify-otp"),headers:{"Content-Type":"application/json"},body:jsonEncode({"email":email,"code":code}),);
+    return jsonDecode(res.body) as Map<String,dynamic>;
+  }
+  static Future<Map<String,dynamic>> resendOtp(String email) async{
+    final res=await http.post(Uri.parse("$baseUrl/api/auth/resend-otp"),headers: {"Content-Type":"application/json"},body: jsonEncode({"email":email,"code":""}),);
+    return jsonDecode(res.body) as Map<String,dynamic>;
+  }
 }

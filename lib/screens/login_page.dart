@@ -4,6 +4,7 @@ import 'home_page.dart';
 import '../services/auth_service.dart';
 import '../models/app_user.dart';
 import '../services/session_service.dart';
+import 'otp_page.dart';
 class LoginPage extends StatefulWidget{
   static const String routeName='/login';
   @override
@@ -26,10 +27,10 @@ class _LoginPageState extends State<LoginPage>{
     setState(() {
       _isLoading=true;
     });
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
+    final email=_emailController.text.trim();
+    final password=_passwordController.text;
     try{
-      final result=await AuthService.login(email, password);
+      final result=await AuthService.login(email,password);
       print("Login result:$result");
       final bool success=result["success"]==true;
       if(success){
@@ -37,7 +38,29 @@ class _LoginPageState extends State<LoginPage>{
         SessionService.setUser(user);
         Navigator.pushReplacementNamed(context, HomePage.routeName);
       }else{
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result["message"]?.toString()??"Login failed"),),);
+        final bool requiresVerification=result["requiresVerification"]==true;
+        final String message =result["message"]!=null? result["message"].toString():"Login failed";
+        if (requiresVerification){
+          String otpEmail;
+          if (result["email"]!=null && result["email"].toString().isNotEmpty){
+            otpEmail=result["email"].toString();
+          } else{
+            otpEmail=email;
+          }
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content:Text(message),
+              action:SnackBarAction(label:"Verify",onPressed:() {Navigator.push(context,MaterialPageRoute(builder:(context){return OtpPage(email: otpEmail);},),);
+                },
+              ),
+            ),
+          );
+        }else{
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+            ),
+          );
+        }
       }
     }catch(e){
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Connection error:$e")),);

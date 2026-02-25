@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/user_service.dart';
 import '../services/session_service.dart';
+import 'basket_page.dart';
 class ProfilePage extends StatefulWidget{
   static const String routeName='/profile';
   final int id;
@@ -124,6 +125,7 @@ class _ProfilePageState extends State<ProfilePage>{
         SessionService.currentUser.notifyListeners();
       }
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("profile updated successfully")),);
+      Navigator.pushReplacementNamed(context,BasketPage.routeName);
     }catch(e){
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("update failed:$e")),);
     }

@@ -4,6 +4,7 @@ import 'login_page.dart';
 import 'home_page.dart';
 import '../services/auth_service.dart';
 import 'package:app/models/app_user.dart';
+import 'otp_page.dart';
 class SignupPage extends StatefulWidget{
   static const String routeName='/signup';
   @override
@@ -33,14 +34,12 @@ class _SignupPageState extends State<SignupPage>{
     final password=_passwordController.text;
     final phone= _phoneController.text.trim();
     try{
-      final result=await AuthService.register(username, email, password,phone);
+      final result=await AuthService.register(username,email,password,phone);
       if (result["success"]==true){
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result["message"]??"Account created")),);
-        final user= AppUser.fromJson(result);
-        SessionService.setUser(user);
-        Navigator.pushReplacementNamed(context, HomePage.routeName);
+       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(result["message"]??"otp sent")),);
+       Navigator.pushReplacement(context, MaterialPageRoute(builder:(context){return OtpPage(email: email);},),);
       }else{
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result["message"]??"Signup failed")),);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(result["message"]??"Signup failed")),);
       }
     }catch(e){
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Connection error:$e")),);
