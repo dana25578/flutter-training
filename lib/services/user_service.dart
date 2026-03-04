@@ -1,7 +1,6 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'api_client.dart';
 class UserService{
-  static const String baseUrl="http://10.0.2.2:8081";
   static Future<Map<String,dynamic>>updateUser({
     required int id,
     required String username,
@@ -9,7 +8,7 @@ class UserService{
     required String phoneNumber,
     required String address,
   })async{
-    final res=await http.put(Uri.parse("$baseUrl/api/users/$id"),headers:{"Content-Type":"application/json"},body:jsonEncode({"username":username,"email":email,"phoneNumber":phoneNumber,"address":address,}),);
+    final res=await ApiClient.put("/api/users/$id",auth:true,body:{"username":username,"email":email,"phoneNumber":phoneNumber,"address":address,},);
     if (res.body.isEmpty){
       throw Exception("empty response");
     }
@@ -19,9 +18,9 @@ class UserService{
     return jsonDecode(res.body) as Map<String,dynamic>;
   }
   static Future<Map<String,dynamic>> getUserById(int id) async{
-    final res=await http.get(Uri.parse("$baseUrl/api/users/$id"),headers: {"Content-Type":"application/json"},);
+    final res=await ApiClient.get("/api/users/$id",auth:true);
     if(res.body.isEmpty){
-      throw Exception("empty respons");
+      throw Exception("empty response");
     }
     if(res.statusCode<200||res.statusCode>=300){
       throw Exception(res.body);

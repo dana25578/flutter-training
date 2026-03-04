@@ -35,7 +35,11 @@ class _LoginPageState extends State<LoginPage>{
       final bool success=result["success"]==true;
       if(success){
         final user=AppUser.fromJson(result);
-        SessionService.setUser(user);
+        final token=(result["token"]??"").toString();
+        if (token.isEmpty){
+          throw Exception("missing token from backend");
+        }
+        SessionService.setSession(user:user,tokenValue:token);
         Navigator.pushReplacementNamed(context, HomePage.routeName);
       }else{
         final bool requiresVerification=result["requiresVerification"]==true;

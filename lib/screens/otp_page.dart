@@ -42,8 +42,13 @@ class _OtpPageState extends State<OtpPage>{
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(message),),);
       if (ok){
         final user=AppUser.fromJson(res);
-        SessionService.setUser(user);
-        Navigator.pushReplacementNamed(context, HomePage.routeName);
+        final token=(res["token"]??"").toString();
+        if (token.isEmpty){
+          throw Exception("missing token from backend after otp");
+        }
+        SessionService.setSession(user:user,tokenValue:token);
+        print("token:${SessionService.token.value}");
+        Navigator.pushReplacementNamed(context,HomePage.routeName);
       }
     }catch (e){
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text("Error: "+e.toString()),),);

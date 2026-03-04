@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../models/cart_item.dart';
+import 'api_client.dart';
 class OrderService{
-  static const String baseUrl="http://10.0.2.2:8081";
   static Future<Map<String,dynamic>> createOrder({
     required int userId,
     required String address,
@@ -18,19 +17,13 @@ class OrderService{
         };
       }).toList(),
     };
-    print("ORDER BODY: ${jsonEncode(body)}");
-    final res=await http.post(Uri.parse("$baseUrl/api/orders"),
-    headers: {"Content-Type": "application/json"},
-      body: jsonEncode(body),
-    );
+    final res=await ApiClient.post("/api/orders",auth:true,body: body);
     if (res.body.isEmpty) throw Exception("empty response from server");
     if (res.statusCode<200||res.statusCode>=300) throw Exception(res.body);
     return jsonDecode(res.body) as Map<String,dynamic>;
   }
   static Future<List<dynamic>> getOrdersByUser(int userId) async{
-    final res=await http.get(Uri.parse("$baseUrl/api/orders/by-user/$userId"),
-    headers: {"Content-Type": "application/json"},
-    );
+    final res=await ApiClient.get("/api/orders/by-user/$userId",auth:true);
     if (res.body.isEmpty) throw Exception("empty response from server");
     if (res.statusCode<200||res.statusCode>=300) throw Exception(res.body);
     return jsonDecode(res.body) as List<dynamic>;

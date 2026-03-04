@@ -7,8 +7,9 @@ class SessionService{
     currentUser.value =user;
     token.value=tokenValue;
   }
-  static void setUser(AppUser user){
+  static void setUser(AppUser user,{String? tokenValue}){
     currentUser.value=user;
+    token.value=tokenValue;
   }
   static void clear(){
     currentUser.value=null;
