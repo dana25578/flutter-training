@@ -6,6 +6,11 @@ import 'screens/home_page.dart';
 import 'screens/profile_page.dart';
 import 'screens/basket_page.dart';
 import 'screens/checkout_page.dart';
+import 'screens/category_items_page.dart';
+import 'screens/wishlist_page.dart';
+import 'screens/categories_page.dart';
+import 'screens/account_page.dart';
+import 'screens/my_orders_page.dart';
 void main(){
   runApp (MyApp());
 }
@@ -28,6 +33,18 @@ class MyApp extends StatelessWidget {
         },
         CategoryItemsPage.routeName:(context){
           return CategoryItemsPage();
+        },
+        CategoriesPage.routeName:(context){
+          return const CategoriesPage();
+        },
+        WishlistPage.routeName:(context){
+          return const WishlistPage();
+        },
+        AccountPage.routeName:(context){
+          return const AccountPage();
+        },
+        MyOrdersPage.routeName:(context){
+          return const MyOrdersPage();
         },
         ProfilePage.routeName:(context){
           final args=ModalRoute.of(context)!.settings.arguments as Map<String,dynamic>?;

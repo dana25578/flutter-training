@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../services/user_service.dart';
 import '../services/session_service.dart';
 import 'basket_page.dart';
+import 'login_page.dart';
 class ProfilePage extends StatefulWidget{
   static const String routeName='/profile';
   final int id;
@@ -35,6 +36,10 @@ class _ProfilePageState extends State<ProfilePage>{
     _phoneController.text="";
     _addressController.text="";
     _loadUser();
+  }
+  void _logout() {
+    SessionService.clear();
+    Navigator.pushNamedAndRemoveUntil(context,LoginPage.routeName,(route){return false;},);
   }
   @override
   void dispose(){
@@ -139,6 +144,12 @@ class _ProfilePageState extends State<ProfilePage>{
         foregroundColor: Colors.black,
         elevation: 0,
         title: const Text('Profile'),
+        actions: [
+          IconButton(
+            onPressed: _logout,
+            icon: const Icon(Icons.logout),
+          ),
+        ],
       ),
       body: SafeArea(
         child: _loading

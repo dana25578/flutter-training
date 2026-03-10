@@ -59,16 +59,25 @@ class CheckoutPage extends StatelessWidget{
                     Text("Address:$address"),
                     const SizedBox(height: 10),
                     Align(
-                      alignment: Alignment.centerRight,
+                      alignment:Alignment.centerRight,
                       child: TextButton(
-                        onPressed: (){
-                          Navigator.pushNamed(context, ProfilePage.routeName,arguments: {
-                            "id":user.id,
-                            "username":user.username,
-                            "email":user.email,
-                          });
+                        style:TextButton.styleFrom(
+                          padding:const EdgeInsets.symmetric(horizontal:12,vertical:8),
+                          foregroundColor:Colors.white,
+                          shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(10),),
+                          backgroundColor:const Color(0xFF000000),
+                        ),
+                        onPressed:(){
+                          Navigator.pushNamed(context,ProfilePage.routeName,arguments:{"id":user.id,"username":user.username,"email":user.email,},);
                         },
-                        child: const Text("edit address"),
+                        child:const Row(
+                          mainAxisSize:MainAxisSize.min,
+                          children:[
+                            Icon(Icons.edit,size:18,color:Colors.white,),
+                            SizedBox(width: 6),
+                            Text("Edit address",style:TextStyle(fontSize:13,fontWeight:FontWeight.w600,color:Colors.white,),),
+                          ],
+                        ),
                       ),
                     ),
                   ],

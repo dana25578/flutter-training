@@ -1,260 +1,256 @@
-import 'package:app/screens/category_items_page.dart';
 import 'package:flutter/material.dart';
 import 'login_page.dart';
-import 'profile_page.dart';
 import '../services/cart_service.dart';
 import 'basket_page.dart';
 import '../services/session_service.dart';
-import '../services/category_service.dart';
-import '../models/category.dart';
 import '../models/product.dart';
 import '../services/product_service.dart';
 import '../services/auth_service.dart';
-class HomePage extends StatelessWidget {
+import '../widgets/app_bottom_nav.dart';
+import 'categories_page.dart';
+import 'wishlist_page.dart';
+import '../services/wishlist_service.dart';
+import 'account_page.dart';
+class HomePage extends StatefulWidget {
   static const String routeName = '/home';
-
-  HomePage({super.key});
-  
+  const HomePage({super.key});
   @override
-  Widget build(BuildContext context){
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        title: Row(
-          children: [
-            InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: (){
-                final user=SessionService.currentUser.value;
-                if(user==null){
-                  Navigator.pushReplacementNamed(context, LoginPage.routeName);
-                  return;
-                }
-                Navigator.pushNamed(context, ProfilePage.routeName,arguments: {'id':user?.id,'username':user?.username??'User','email':user?.email?? 'user@gmail.com',},);
-              },
-              child: Container(
-                margin: const EdgeInsets.only(right: 16),
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.person,color: Colors.white),
-              ),
-            ),
-            const SizedBox(width:12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Welcome', style: TextStyle(fontSize: 12,color: Colors.black54),
-                ),
-                ValueListenableBuilder(valueListenable: SessionService.currentUser, builder: (context,user, _){
-                  final name=user?.username??'User';
-                  return Text(name, style:const TextStyle(fontSize: 16,fontWeight: FontWeight.bold,),);
-                },
-                ),
-              ],
-            )
-          ],
-        ),
-        actions: [
-          IconButton(onPressed: (){
-            Navigator.pushNamed(context, BasketPage.routeName);
-          }, icon: Icon (Icons.shopping_basket_outlined),),
-          IconButton(
-              icon:const Icon(Icons.logout),
-              onPressed: (){
-                SessionService.clear();
-                Navigator.pushReplacementNamed(context, LoginPage.routeName);
-              },
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              gradient: const LinearGradient(colors: [Color(0xFF111827), Color(0xFF374151)],
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(child: Text(
-                  'Discover new products \nand best deals!',
-                  style: const TextStyle(
-                    color:Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                 ),
-                ),
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(Icons.shopping_bag,color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Text('Categories',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          FutureBuilder<List<Category>>(
-            future: CategoryService.getCategories(),
-            builder: (context,snapshot){
-              if(snapshot.connectionState==ConnectionState.waiting){
-                return const Padding(padding: EdgeInsets.all(12),child: Center(child:CircularProgressIndicator()),);
-              }
-              if(snapshot.hasError){
-              return Padding(padding:const EdgeInsets.all(12),child:Text("Failed to load categories:"+snapshot.error.toString()),);
-              }
-              final List<Category> categories=snapshot.data??[];
-              if(categories.isEmpty){
-                return const Padding(padding: EdgeInsets.all(12),child: Text("No categories found"),);
-              }
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(children: _buildCategoriesFromApi(context,categories),),
-              );
-            },
-
-          ),
-          const SizedBox(height:20),
-          const  Text('Products',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          FutureBuilder<List<Product>>(
-            future: ProductService.getAllProducts(),builder: (context,snapshot){
-              if (snapshot.connectionState==ConnectionState.waiting){
-                return const Padding(padding: EdgeInsets.all(12),
-                  child: Center(child:CircularProgressIndicator()),
-                );
-              }
-              if(snapshot.hasError){
-                return Padding(padding: const EdgeInsets.all(12),
-                  child: Text("Failed to load products:${snapshot.error}"),
-                );
-              }
-              final products=snapshot.data??[];
-              if (products.isEmpty){
-                return const Padding(padding: EdgeInsets.all(12),
-                  child: Text("no products found"),
-                );
-              }
-              return GridView.builder(
-                itemCount: products.length,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2,childAspectRatio: 0.65,crossAxisSpacing: 12,mainAxisSpacing: 12,),
-                itemBuilder: (context,index){
-                  return _buildProductCardFromApi(products[index]);
-                },
-              );
-          },
-          )
+  State<HomePage> createState() {
+    return _HomePageState();
+  }
+}
+class _HomePageState extends State<HomePage>{
+  final TextEditingController _searchController=TextEditingController();
+  List<Product> _allProducts=[];
+  bool _loading=true;
+  String? _error;
+  int _bottomNavIndex=0;
+  int _selectedTopTabIndex= 0;
+  @override
+  void initState(){
+    super.initState();
+    _loadProducts();
+    _searchController.addListener((){
+      setState(() {});
+    });
+  }
+  @override
+  void dispose(){
+    _searchController.dispose();
+    super.dispose();
+  }
+  Future<void> _loadProducts() async{
+    setState(() {
+      _loading=true;
+      _error=null;
+    });
+    try{
+      final List<Product> products=await ProductService.getAllProducts();
+      setState((){
+        _allProducts=products;
+      });
+    }catch (e){
+      setState(() {
+        _error=e.toString();
+      });
+    }
+    setState(() {
+      _loading=false;
+    });
+  }
+  List<Product> get _filteredProducts{
+    List<Product> result=List<Product>.from(_allProducts);
+    final String query =_searchController.text.trim().toLowerCase();
+    if (query.isNotEmpty){
+      result=result.where((product){
+        final String name=product.name.toLowerCase();
+        final String description =(product.description??'').toLowerCase();
+        return name.contains(query)||description.contains(query);
+      }).toList();
+    }
+    return result;
+  }
+  void _onBottomTap(int index){
+    setState(() {
+      _bottomNavIndex=index;
+    });
+    if (index==0){
+      return;
+    }
+    if (index==1){
+      Navigator.pushNamed(context,CategoriesPage.routeName);
+      return;
+    }
+    if (index ==2){
+      Navigator.pushNamed(context,BasketPage.routeName);
+      return;
+    }
+    if (index==3){
+      Navigator.pushNamed(context,WishlistPage.routeName);
+      return;
+    }
+    if (index==4){
+      final user=SessionService.currentUser.value;
+      if (user==null){
+        Navigator.pushNamed(context,LoginPage.routeName);
+        return;
+      }
+      Navigator.pushNamed(context,AccountPage.routeName);
+    }
+  }
+  Widget _buildLogoArea(){
+    return Padding(padding:const EdgeInsets.only(top:16,bottom: 10),
+      child:Column(
+        children:[
+          const SizedBox(height: 6),
+          Image.asset('assets/images/1.png',height:80,fit:BoxFit.contain,),
         ],
       ),
     );
   }
-  List<Widget> _buildCategoriesFromApi(BuildContext context,List<Category>categories){
-    final List<Widget> widgets=[];
-    for(int i=0;i<categories.length;i++){
-      final Category category=categories[i];
-      final String imagePath=category.imageUrl??"assets/images/placeholder.png";
-      widgets.add(Padding(padding: const EdgeInsets.only(right: 10),child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: (){
-          Navigator.pushNamed(context, CategoryItemsPage.routeName,arguments: {"categoryId":category.id,"categoryName":category.name});
-        },
-        child: Container(padding: const EdgeInsets.symmetric(horizontal: 14,vertical: 12),decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.black12),
-        ),child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(imagePath,width: 22,height: 22,fit: BoxFit.cover,),
-            ),
-            const SizedBox(width: 8),
-            Text(category.name,style: const  TextStyle(fontWeight: FontWeight.w600),),
-          ],
-        ),
-        ),
-      ),),);
-    }
-    return widgets;
-  }
-  Widget _buildProductCardFromApi(Product product){
-    final imagePath=product.imageUrl?? "assets/images/placeholder.png";
+  Widget _buildSearchBar(){
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow:[
-          BoxShadow(color: Colors.black.withOpacity(0.06),blurRadius: 12,offset: const Offset(0, 8),),
-        ]
+      margin:const EdgeInsets.fromLTRB(16,10,16,14),
+      height:56,
+      decoration:BoxDecoration(
+        color:Colors.white,
+        borderRadius:BorderRadius.circular(30),
+        boxShadow:[BoxShadow(color:Colors.black.withOpacity(0.06),blurRadius:14,offset:const Offset(0,6),),],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                width: double.infinity,
-                child: Image.network(
-                  "${AuthService.baseUrl}${product.imageUrl}",
-                  height: 120,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+      child:TextField(controller:_searchController,
+        decoration:const InputDecoration(
+          prefixIcon:Icon(Icons.search,color:Colors.grey,size:28,),
+          hintText:"what are you looking for?",
+          hintStyle:TextStyle(color:Color(0xFF98A2B3),fontSize:16,),
+          border:InputBorder.none,
+          contentPadding:EdgeInsets.symmetric(vertical:16),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductCard(Product product){
+    final String imagePath=product.imageUrl??"";
+    final bool isFavorite=WishlistService.instance.isInWishlist(product);
+    return Container(
+      decoration:BoxDecoration(
+        color:Colors.white,
+        borderRadius:BorderRadius.circular(16),
+        boxShadow:[BoxShadow(color:Colors.black.withOpacity(0.05),blurRadius:12,offset:const Offset(0, 8),),],
+      ),
+      child:Padding(
+        padding:const EdgeInsets.all(10),
+        child:Column(
+          crossAxisAlignment:CrossAxisAlignment.start,
+          children:[
+            Align(alignment:Alignment.topRight,
+              child:IconButton(onPressed:(){WishlistService.instance.toggleProduct(product);
+                setState(() {});
+                },
+                icon:Icon(isFavorite?Icons.favorite :Icons.favorite_border,color:isFavorite ?Colors.red:Colors.grey,),
               ),
             ),
-            ),
-            const SizedBox(height: 10),
-            Text(product.name,maxLines: 1,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.bold),),
-            const SizedBox(height: 4),
-            Text(product.description??"",maxLines: 1,overflow:TextOverflow.ellipsis,style: const TextStyle(color: Colors.black54,fontSize: 12)),
-            const SizedBox(height: 6),
-            Text("\$${product.price.toStringAsFixed(0)}",style: const TextStyle(fontWeight:FontWeight.bold)),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              height: 38,
-              child: ElevatedButton(
-                onPressed: (){
-                  CartService.instance.addProduct({
-                    "id":product.id,
-                    "name":product.name,
-                    "price":product.price,
-                    "image":imagePath,
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF111827),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),),
+            Expanded(
+              child:Container(
+                width:double.infinity,
+                decoration:BoxDecoration(
+                  color:const Color(0xFFF3F4F6),
+                  borderRadius:BorderRadius.circular(12),
                 ),
-                child: const Text("Add to cart", style: TextStyle(fontSize: 13,fontWeight:FontWeight.w600)),
+                child:imagePath.isNotEmpty?ClipRRect(
+                  borderRadius:BorderRadius.circular(12),
+                  child:Image.network("${AuthService.baseUrl}$imagePath",fit:BoxFit.cover,),):const Icon(Icons.image_outlined),
+              ),
+            ),
+            const SizedBox(height:10),
+            Text(product.name,maxLines:1,overflow:TextOverflow.ellipsis,style:const TextStyle(fontWeight:FontWeight.w600,),),
+            const SizedBox(height: 4),
+            Text("\$${product.price.toStringAsFixed(0)}",style:const TextStyle(fontWeight:FontWeight.bold,),),
+            const SizedBox(height:10),
+            SizedBox(
+              width:double.infinity,
+              height:38,
+              child:ElevatedButton(
+                onPressed:(){CartService.instance.addProduct({"id":product.id,"name":product.name,"price":product.price,"image":imagePath,});
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text("${product.name} added to cart"),duration:const Duration(milliseconds:800),),);
+                },
+                style:ElevatedButton.styleFrom(
+                  backgroundColor:const Color(0xFF111827),
+                  foregroundColor:Colors.white,
+                  shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(12),),
+                ),
+                child:const Text("Add to cart"),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+  Widget _buildProductsBody(){
+    if (_loading){
+      return const Expanded(
+        child:Center(
+          child:CircularProgressIndicator(),
+        ),
+      );
+    }
+    if (_error!=null){
+      return Expanded(
+        child:Center(
+          child:Padding(
+            padding:const EdgeInsets.all(16),
+            child:Text("failed to load home page:\n$_error",textAlign:TextAlign.center,),
+          ),
+        ),
+      );
+    }
+    final List<Product> products=_filteredProducts;
+    if (_selectedTopTabIndex!=0){
+      return Expanded(
+        child: Center(
+          child: Text("i will add it",style: const TextStyle(fontSize:16),),
+        ),
+      );
+    }
+    if (products.isEmpty){
+      return const Expanded(
+        child:Center(
+          child:Text("no products found"),
+        ),
+      );
+    }
+    return Expanded(
+      child:RefreshIndicator(
+        onRefresh:_loadProducts,
+        child:GridView.builder(
+          padding:const EdgeInsets.fromLTRB(16,16,16,16),
+          itemCount:products.length,
+          gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount:2,
+            crossAxisSpacing:14,
+            mainAxisSpacing:14,
+            childAspectRatio:0.62,
+          ),
+          itemBuilder:(context, index){
+            return _buildProductCard(products[index]);
+          },
+        ),
+      ),
+    );
+  }
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      backgroundColor:const Color(0xFFF6F7FB),
+      body:SafeArea(
+        child:Column(
+          children:[_buildLogoArea(),_buildSearchBar(),const Divider(height: 1),_buildProductsBody(),],
+        ),
+      ),
+      bottomNavigationBar:AppBottomNav(
+        currentIndex:_bottomNavIndex,
+        onTap:_onBottomTap,
       ),
     );
   }

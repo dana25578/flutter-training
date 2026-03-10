@@ -4,6 +4,7 @@ import 'package:app/services/product_service.dart';
 import 'package:flutter/material.dart';
 import 'basket_page.dart';
 import '../services/auth_service.dart';
+import 'package:app/services/wishlist_service.dart';
 class CategoryItemsPage extends StatelessWidget{
   static const String routeName='/category-items';
   const CategoryItemsPage({super.key});
@@ -21,7 +22,7 @@ class CategoryItemsPage extends StatelessWidget{
         title: Text(categoryName),
         actions: [IconButton(onPressed: (){
           Navigator.pushNamed(context, BasketPage.routeName);
-        }, icon: const Icon(Icons.shopping_basket_outlined),),],
+        }, icon: const Icon(Icons.shopping_cart_outlined),),],
       ),
       body:FutureBuilder<List<Product>>(
         future: ProductService.getProductsByCategory(categoryId),
@@ -43,93 +44,87 @@ class CategoryItemsPage extends StatelessWidget{
           if(products.isEmpty){
             return const Center(child: Text("no products found"));
           }
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: products.length,
-            itemBuilder: (context,index){
-              final product=products[index];
-              final imagePath= product.imageUrl??"assets/images/placeholder.png";
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 12,
-                      offset: const Offset(0, 8),
+          return ValueListenableBuilder<List<Product>>(
+            valueListenable:WishlistService.instance.wishlist,
+            builder:(context,wishlistItems,child){
+              return ListView.builder(padding:const EdgeInsets.all(16),itemCount:products.length,
+                itemBuilder:(context,index){
+                  final Product product=products[index];
+                  final String imagePath =product.imageUrl??"assets/images/placeholder.png";
+                  final bool isFavorite=WishlistService.instance.isInWishlist(product);
+                  return Container(
+                    margin:const EdgeInsets.only(bottom:12),
+                    decoration:BoxDecoration(
+                      color:Colors.white,
+                      borderRadius:BorderRadius.circular(16),
+                      boxShadow:[BoxShadow(color:Colors.black.withOpacity(0.05),blurRadius:12,offset:const Offset(0, 8)),],
                     ),
-                  ],
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(vertical:8,horizontal:12 ),
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      width: 52,
-                      height: 52,
-                      color: const Color(0xFFF3F4F6),
-                      child: Image.network(
-                        "${AuthService.baseUrl}${product.imageUrl}",
-                        height: 120,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
+                    child:ListTile(
+                      contentPadding:const EdgeInsets.symmetric(vertical:8,horizontal:12,),
+                      leading:ClipRRect(
+                        borderRadius:BorderRadius.circular(12),
+                        child:Container(
+                          width:52,
+                          height:52,
+                          color:const Color(0xFFF3F4F6),
+                          child:Image.network("${AuthService.baseUrl}$imagePath",fit:BoxFit.cover,),
+                        ),
+                      ),
+                      title:Text(product.name,style:const TextStyle(fontWeight:FontWeight.w600,),
+                      ),
+                      subtitle:Padding(
+                        padding:const EdgeInsets.only(top:4),
+                        child:Text(product.description??""),
+                      ),
+                      trailing:SizedBox(
+                        width:150,
+                        child:Row(
+                          mainAxisAlignment:MainAxisAlignment.end,
+                          children:[
+                            Text('\$${product.price.toStringAsFixed(0)}',style:const TextStyle(fontWeight:FontWeight.bold,),
+                            ),
+                            IconButton(
+                              onPressed:(){
+                                WishlistService.instance.toggleProduct(product);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content:Text(isFavorite?"${product.name} removed from wishlist":"${product.name} added to wishlist",),
+                                    duration:const Duration(milliseconds:800,),
+                                  ),
+                                );
+                              },
+                              icon:Icon(isFavorite?Icons.favorite:Icons.favorite_border,color:isFavorite?Colors.red:Colors.grey,),
+                            ),
+                            const SizedBox(width:8),
+                            Container(
+                              width:34,
+                              height:34,
+                              decoration:BoxDecoration(
+                                borderRadius:BorderRadius.circular(10),
+                              ),
+                              child:IconButton(
+                                padding:EdgeInsets.zero,
+                                icon: const Icon(Icons.add_shopping_cart,color:Colors.black,),
+                                onPressed:(){
+                                  CartService.instance.addProduct({"id":product.id,"name":product.name,"price":product.price,"image":imagePath,});
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content:Text("${product.name} added to cart"),duration:const Duration(milliseconds:800,),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  title: Text(
-                    product.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top:4),
-                    child: Text(product.description??""),
-                  ),
-                  trailing: SizedBox(
-                    width: 125,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text('\$${product.price.toStringAsFixed(0)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(width:10),
-                        Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF111827),
-                            borderRadius:BorderRadius.circular(10),
-                          ),
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            icon: const Icon(
-                              Icons.add_shopping_cart,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                            onPressed: (){
-                              CartService.instance.addProduct({
-                                "id":product.id,
-                                'name':product.name,
-                                'price':product.price,
-                                'image':imagePath,
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${product.name} added to cart"),duration: const Duration(milliseconds: 800),),);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                  );
+                },
               );
             },
           );
         },
       ),
-
     );
   }
 }
