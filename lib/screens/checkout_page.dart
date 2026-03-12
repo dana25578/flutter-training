@@ -140,7 +140,7 @@ class CheckoutPage extends StatelessWidget{
                       address:address,
                       items:items,
                     );
-                    CartService.instance.cart.value=[];
+                    await CartService.instance.clearAll();
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("order placed")),);
                     Navigator.pushReplacementNamed(context, HomePage.routeName);
                   }catch(e){

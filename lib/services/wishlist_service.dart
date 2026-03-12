@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/product.dart';
+import 'wishlist_api_service.dart';
+import 'session_service.dart';
 class WishlistService{
   WishlistService._();
   static final WishlistService instance=WishlistService._();
@@ -9,7 +11,12 @@ class WishlistService{
       return item.id==product.id;
     });
   }
-  void toggleProduct(Product product){
+  Future<void> loadWishlistFromBackend() async{
+    if (!SessionService.isLoggedIn) return;
+    final items=await WishlistApiService.getMyWishlist();
+    wishlist.value=items;
+  }
+  Future<void> toggleProduct(Product product)async{
     final List<Product> items=List<Product>.from(wishlist.value);
     final int index=items.indexWhere((item){
       return item.id==product.id;
@@ -20,5 +27,11 @@ class WishlistService{
       items.removeAt(index);
     }
     wishlist.value=items;
+  }
+  Future<void> clearAll() async{
+    if (SessionService.isLoggedIn){
+      await WishlistApiService.clearWishlist();
+    }
+    wishlist.value=[];
   }
 }

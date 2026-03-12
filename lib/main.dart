@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Training',
       debugShowCheckedModeBanner: false,
-      initialRoute: LoginPage.routeName,
+      initialRoute:HomePage.routeName,
       routes: {
         LoginPage.routeName: (context){
           return LoginPage();

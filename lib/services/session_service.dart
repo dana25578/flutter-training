@@ -15,4 +15,8 @@ class SessionService{
     currentUser.value=null;
     token.value=null;
   }
+  static bool get isLoggedIn{
+    final t=token.value;
+    return t!=null && t.isNotEmpty && currentUser.value!=null;
+  }
 }

@@ -90,11 +90,6 @@ class _HomePageState extends State<HomePage>{
       return;
     }
     if (index==4){
-      final user=SessionService.currentUser.value;
-      if (user==null){
-        Navigator.pushNamed(context,LoginPage.routeName);
-        return;
-      }
       Navigator.pushNamed(context,AccountPage.routeName);
     }
   }
@@ -144,9 +139,10 @@ class _HomePageState extends State<HomePage>{
           crossAxisAlignment:CrossAxisAlignment.start,
           children:[
             Align(alignment:Alignment.topRight,
-              child:IconButton(onPressed:(){WishlistService.instance.toggleProduct(product);
+              child:IconButton(onPressed:()async{
+                await WishlistService.instance.toggleProduct(product);
                 setState(() {});
-                },
+              },
                 icon:Icon(isFavorite?Icons.favorite :Icons.favorite_border,color:isFavorite ?Colors.red:Colors.grey,),
               ),
             ),
@@ -171,7 +167,7 @@ class _HomePageState extends State<HomePage>{
               width:double.infinity,
               height:38,
               child:ElevatedButton(
-                onPressed:(){CartService.instance.addProduct({"id":product.id,"name":product.name,"price":product.price,"image":imagePath,});
+                onPressed:()async{await CartService.instance.addProduct({"id":product.id,"name":product.name,"price":product.price,"image":imagePath,});
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text("${product.name} added to cart"),duration:const Duration(milliseconds:800),),);
                 },
                 style:ElevatedButton.styleFrom(

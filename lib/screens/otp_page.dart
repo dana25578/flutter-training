@@ -4,6 +4,8 @@ import '../services/auth_service.dart';
 import 'login_page.dart';
 import '../models/app_user.dart';
 import '../services/session_service.dart';
+import '../services/cart_service.dart';
+import '../services/wishlist_service.dart';
 class OtpPage extends StatefulWidget{
   static const routeName='/otp';
   final String email;
@@ -47,6 +49,8 @@ class _OtpPageState extends State<OtpPage>{
           throw Exception("missing token from backend after otp");
         }
         SessionService.setSession(user:user,tokenValue:token);
+        await CartService.instance.loadCartFromBackend();
+        await WishlistService.instance.loadWishlistFromBackend();
         print("token:${SessionService.token.value}");
         Navigator.pushReplacementNamed(context,HomePage.routeName);
       }

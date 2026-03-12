@@ -3,10 +3,15 @@ import '../services/session_service.dart';
 import 'login_page.dart';
 import 'profile_page.dart';
 import 'my_orders_page.dart';
+import 'signup_page.dart';
+import '../services/cart_service.dart';
+import '../services/wishlist_service.dart';
 class AccountPage extends StatelessWidget{
   static const String routeName='/account';
   const AccountPage({super.key});
   void _logout(BuildContext context){
+    CartService.instance.clearAll();
+    WishlistService.instance.clearAll();
     SessionService.clear();
     Navigator.pushNamedAndRemoveUntil(context,LoginPage.routeName,(route){return false;},);
   }
@@ -33,9 +38,31 @@ class AccountPage extends StatelessWidget{
       ),
     );
   }
+  Widget _guestCard(){
+    return Container(
+      width:double.infinity,
+      margin:const EdgeInsets.only(bottom:16),
+      padding:const EdgeInsets.all(18),
+      decoration:BoxDecoration(
+        color:Colors.white,
+        borderRadius:BorderRadius.circular(18),
+      ),
+      child:const Column(
+        crossAxisAlignment:CrossAxisAlignment.start,
+        children:[
+          Text("Guest mode",style:TextStyle(fontSize:18,fontWeight:FontWeight.w700,color:Colors.black,),),
+          SizedBox(height:8),
+          Text("you can browse products, add items to cart, and use wishlist as a guest. To checkout,save your profile,and view your orders,please login or sign up.",
+            style: TextStyle(fontSize:14,color:Colors.black87,height:1.4,),
+          ),
+        ],
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context){
     final user=SessionService.currentUser.value;
+    final bool isLoggedIn=user!=null;
     return Scaffold(
       backgroundColor:const Color(0xFFF6F7FB),
       appBar:AppBar(
@@ -49,25 +76,45 @@ class AccountPage extends StatelessWidget{
           padding:const EdgeInsets.all(16),
           child:Column(
             children:[
-              _menuCard(icon:Icons.person_outline,title:"Profile",
-                onTap:(){
-                  if (user==null){
+              if (!isLoggedIn) _guestCard(),
+              if (isLoggedIn) ...[
+                _menuCard(
+                  icon:Icons.person_outline,
+                  title:"Profile",
+                  onTap:(){
+                    Navigator.pushNamed(context,ProfilePage.routeName,arguments:{"id":user.id,"username":user.username,"email":user.email,},);
+                  },
+                ),
+                _menuCard(
+                  icon:Icons.inventory_2_outlined,
+                  title:"My orders",
+                  onTap:() {
+                    Navigator.pushNamed(context,MyOrdersPage.routeName);
+                  },
+                ),
+                _menuCard(
+                  icon:Icons.logout,
+                  title:"Logout",
+                  onTap:(){
+                    _logout(context);
+                  },
+                ),
+              ]else ...[
+                _menuCard(
+                  icon:Icons.login,
+                  title:"Login",
+                  onTap:(){
                     Navigator.pushNamed(context,LoginPage.routeName);
-                    return;
-                  }
-                  Navigator.pushNamed(context,ProfilePage.routeName,arguments:{"id":user.id,"username":user.username,"email":user.email,},);
-                },
-              ),
-              _menuCard(icon:Icons.inventory_2_outlined,title:"My orders",
-                onTap:(){
-                  Navigator.pushNamed(context,MyOrdersPage.routeName);
-                },
-              ),
-              _menuCard(icon:Icons.logout,title:"Logout",
-                onTap:(){
-                  _logout(context);
-                },
-              ),
+                  },
+                ),
+                _menuCard(
+                  icon:Icons.person_add_alt_1_outlined,
+                  title:"Sign up",
+                  onTap:(){
+                    Navigator.pushNamed(context,SignupPage.routeName);
+                  },
+                ),
+              ],
             ],
           ),
         ),

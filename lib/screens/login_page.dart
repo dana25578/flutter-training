@@ -5,6 +5,8 @@ import '../services/auth_service.dart';
 import '../models/app_user.dart';
 import '../services/session_service.dart';
 import 'otp_page.dart';
+import '../services/cart_service.dart';
+import '../services/wishlist_service.dart';
 class LoginPage extends StatefulWidget{
   static const String routeName='/login';
   @override
@@ -40,6 +42,8 @@ class _LoginPageState extends State<LoginPage>{
           throw Exception("missing token from backend");
         }
         SessionService.setSession(user:user,tokenValue:token);
+        await CartService.instance.loadCartFromBackend();
+        await WishlistService.instance.loadWishlistFromBackend();
         Navigator.pushReplacementNamed(context, HomePage.routeName);
       }else{
         final bool requiresVerification=result["requiresVerification"]==true;

@@ -60,15 +60,20 @@ class WishlistPage extends StatelessWidget{
                       ),
                     ),
                     IconButton(
-                      onPressed:(){
-                        WishlistService.instance.toggleProduct(product);
+                      onPressed:() async{
+                        await WishlistService.instance.toggleProduct(product);
                       },
                       icon:const Icon(Icons.favorite,color: Colors.red,),
                     ),
                     IconButton(
-                      onPressed:(){
-                        CartService.instance.addProduct({"id":product.id,"name":product.name,"price":product.price,"image":imagePath,});
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text("${product.name} added to cart"),duration:const Duration(milliseconds: 800),),);
+                      onPressed:() async{
+                        await CartService.instance.addProduct({"id":product.id,"name":product.name,"price":product.price,"image":imagePath,});
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content:Text("${product.name} added to cart"),
+                            duration:const Duration(milliseconds:800),
+                          ),
+                        );
                       },
                       icon:const Icon(Icons.add_shopping_cart),
                     ),

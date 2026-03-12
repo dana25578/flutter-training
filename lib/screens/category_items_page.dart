@@ -84,14 +84,9 @@ class CategoryItemsPage extends StatelessWidget{
                             Text('\$${product.price.toStringAsFixed(0)}',style:const TextStyle(fontWeight:FontWeight.bold,),
                             ),
                             IconButton(
-                              onPressed:(){
-                                WishlistService.instance.toggleProduct(product);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content:Text(isFavorite?"${product.name} removed from wishlist":"${product.name} added to wishlist",),
-                                    duration:const Duration(milliseconds:800,),
-                                  ),
-                                );
+                              onPressed:() async{
+                                await WishlistService.instance.toggleProduct(product);
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(isFavorite? "${product.name} removed from wishlist":"${product.name} added to wishlist",),duration: const Duration(milliseconds: 800),),);
                               },
                               icon:Icon(isFavorite?Icons.favorite:Icons.favorite_border,color:isFavorite?Colors.red:Colors.grey,),
                             ),
@@ -105,12 +100,9 @@ class CategoryItemsPage extends StatelessWidget{
                               child:IconButton(
                                 padding:EdgeInsets.zero,
                                 icon: const Icon(Icons.add_shopping_cart,color:Colors.black,),
-                                onPressed:(){
-                                  CartService.instance.addProduct({"id":product.id,"name":product.name,"price":product.price,"image":imagePath,});
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content:Text("${product.name} added to cart"),duration:const Duration(milliseconds:800,),
-                                    ),
-                                  );
+                                onPressed:() async{
+                                  await CartService.instance.addProduct({"id":product.id,"name":product.name,"price":product.price,"image":imagePath,});
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text("${product.name} added to cart"),duration:const Duration(milliseconds: 800),),);
                                 },
                               ),
                             ),
