@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'package:app/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/user_service.dart';
 import '../services/session_service.dart';
 import 'basket_page.dart';
-import 'login_page.dart';
+import '../services/profile_image_service.dart';
+import 'home_page.dart';
 class ProfilePage extends StatefulWidget{
   static const String routeName='/profile';
   final int id;
@@ -37,9 +39,9 @@ class _ProfilePageState extends State<ProfilePage>{
     _addressController.text="";
     _loadUser();
   }
-  void _logout() {
-    SessionService.clear();
-    Navigator.pushNamedAndRemoveUntil(context,LoginPage.routeName,(route){return false;},);
+  Future<void> _logout() async{
+    await SessionService.clear();
+    Navigator.pushNamedAndRemoveUntil(context,HomePage.routeName,(route){return false;},);
   }
   @override
   void dispose(){
@@ -53,9 +55,21 @@ class _ProfilePageState extends State<ProfilePage>{
     final ImagePicker picker=ImagePicker();
     final XFile? file=await picker.pickImage(source: ImageSource.gallery);
     if (file==null) return;
+    final imageFile=File(file.path);
     setState(() {
-      _profileImage=File(file.path);
+      _profileImage=imageFile;
     });
+    try{
+      final imageUrl=await ProfileImageService.uploadImage(imageFile);
+      final current=SessionService.currentUser.value;
+      if(current!=null){
+        current.profileImage=imageUrl;
+        await SessionService.setUser(current);
+      }setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Image updated")),);
+    }catch (e){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("upload failed:$e")),);
+    }
   }
   Future<void> _loadUser() async{
     setState(() {
@@ -74,7 +88,8 @@ class _ProfilePageState extends State<ProfilePage>{
         current.email=_emailController.text;
         current.phoneNumber=_phoneController.text;
         current.address=_addressController.text;
-        SessionService.currentUser.value=current;
+        current.profileImage=data["profileImage"];
+        await SessionService.setUser(current);
       }
     }catch(e){
       _loadError=e.toString();
@@ -126,8 +141,7 @@ class _ProfilePageState extends State<ProfilePage>{
         current.email=updated["email"]?? current.email;
         current.phoneNumber=updated["phoneNumber"]?? current.phoneNumber;
         current.address=updated["address"]??current.address;
-        SessionService.currentUser.value=current;
-        SessionService.currentUser.notifyListeners();
+        await SessionService.setUser(current);
       }
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("profile updated successfully")),);
       Navigator.pushReplacementNamed(context,BasketPage.routeName);
@@ -137,6 +151,7 @@ class _ProfilePageState extends State<ProfilePage>{
   }
   @override
   Widget build(BuildContext context){
+    final profileImagePath=SessionService.currentUser.value?.profileImage;
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
       appBar: AppBar(
@@ -174,8 +189,8 @@ class _ProfilePageState extends State<ProfilePage>{
               _card(Column(children: [GestureDetector(onTap: _pickImage,child: CircleAvatar(
                 radius: 46,
                 backgroundColor: const Color(0xFFF1F5F9),
-                backgroundImage: _profileImage!=null?FileImage(_profileImage!):null,
-                child: _profileImage==null?const Icon(Icons.camera_alt,color: Colors.black54):null,
+                backgroundImage:profileImagePath!= null?NetworkImage("${AuthService.baseUrl}$profileImagePath"):null,
+                child:profileImagePath==null? const Icon(Icons.camera_alt):null,
               ),
               ),
                 const SizedBox(height: 10),

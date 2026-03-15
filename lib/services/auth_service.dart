@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/session_service.dart';
 class AuthService{
   static const String baseUrl="http://10.0.2.2:8081";
   static Future<Map<String,dynamic>> login(String email,String password,) async{
     final res=await http.post(Uri.parse("$baseUrl/api/auth/login"),headers: {"Content-Type":"application/json"},body: jsonEncode({"email":email,"password":password,}),);
     final data=jsonDecode(res.body) as Map<String,dynamic>;
-    final token=data["token"];
-    print("token:$token");
     if (res.statusCode!=200 && res.statusCode!=201){
       throw Exception(data["message"]??"login failed");
     }
@@ -20,8 +20,6 @@ class AuthService{
     final res=await http.post(
       Uri.parse("$baseUrl/api/auth/verify-otp"),headers:{"Content-Type":"application/json"},body:jsonEncode({"email":email,"code":code}),);
     final data=jsonDecode(res.body) as Map<String,dynamic>;
-    final token=data["token"];
-    print("token:$token");
     if (res.statusCode!=200 && res.statusCode!=201){
       throw Exception(data["message"]??"otp verification failed");
     }

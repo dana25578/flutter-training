@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage>{
         if (token.isEmpty){
           throw Exception("missing token from backend");
         }
-        SessionService.setSession(user:user,tokenValue:token);
+        await SessionService.setSession(user:user,tokenValue:token);
         await CartService.instance.loadCartFromBackend();
         await WishlistService.instance.loadWishlistFromBackend();
         Navigator.pushReplacementNamed(context, HomePage.routeName);

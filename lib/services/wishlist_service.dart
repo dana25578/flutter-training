@@ -17,6 +17,11 @@ class WishlistService{
     wishlist.value=items;
   }
   Future<void> toggleProduct(Product product)async{
+    if (SessionService.isLoggedIn){
+      final items=await WishlistApiService.toggleProduct(product.id);
+      wishlist.value=items;
+      return;
+    }
     final List<Product> items=List<Product>.from(wishlist.value);
     final int index=items.indexWhere((item){
       return item.id==product.id;

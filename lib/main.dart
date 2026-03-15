@@ -6,12 +6,24 @@ import 'screens/home_page.dart';
 import 'screens/profile_page.dart';
 import 'screens/basket_page.dart';
 import 'screens/checkout_page.dart';
-import 'screens/category_items_page.dart';
 import 'screens/wishlist_page.dart';
 import 'screens/categories_page.dart';
 import 'screens/account_page.dart';
 import 'screens/my_orders_page.dart';
-void main(){
+import 'services/session_service.dart';
+import 'services/cart_service.dart';
+import 'services/wishlist_service.dart';
+Future<void> main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await SessionService.init();
+  if (SessionService.isLoggedIn){
+    try{
+      await CartService.instance.loadCartFromBackend();
+      await WishlistService.instance.loadWishlistFromBackend();
+    }catch (e){
+      print("failed to restore cart/wishlist:$e");
+    }
+  }
   runApp (MyApp());
 }
 class MyApp extends StatelessWidget {
@@ -20,7 +32,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Training',
       debugShowCheckedModeBanner: false,
-      initialRoute:HomePage.routeName,
+      home:const HomePage(),
       routes: {
         LoginPage.routeName: (context){
           return LoginPage();

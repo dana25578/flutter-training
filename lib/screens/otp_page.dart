@@ -48,7 +48,7 @@ class _OtpPageState extends State<OtpPage>{
         if (token.isEmpty){
           throw Exception("missing token from backend after otp");
         }
-        SessionService.setSession(user:user,tokenValue:token);
+        await SessionService.setSession(user:user,tokenValue:token);
         await CartService.instance.loadCartFromBackend();
         await WishlistService.instance.loadWishlistFromBackend();
         print("token:${SessionService.token.value}");

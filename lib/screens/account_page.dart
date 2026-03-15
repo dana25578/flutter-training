@@ -1,3 +1,4 @@
+import 'package:app/screens/home_page.dart';
 import 'package:flutter/material.dart';
 import '../services/session_service.dart';
 import 'login_page.dart';
@@ -9,11 +10,11 @@ import '../services/wishlist_service.dart';
 class AccountPage extends StatelessWidget{
   static const String routeName='/account';
   const AccountPage({super.key});
-  void _logout(BuildContext context){
-    CartService.instance.clearAll();
-    WishlistService.instance.clearAll();
-    SessionService.clear();
-    Navigator.pushNamedAndRemoveUntil(context,LoginPage.routeName,(route){return false;},);
+  Future <void> _logout(BuildContext context) async{
+    await CartService.instance.clearAll();
+    await WishlistService.instance.clearAll();
+    await SessionService.clear();
+    Navigator.pushNamedAndRemoveUntil(context,HomePage.routeName,(route){return false;},);
   }
   Widget _menuCard({required IconData icon,required String title,required VoidCallback onTap,}){
     return GestureDetector(
@@ -95,8 +96,8 @@ class AccountPage extends StatelessWidget{
                 _menuCard(
                   icon:Icons.logout,
                   title:"Logout",
-                  onTap:(){
-                    _logout(context);
+                  onTap:() async{
+                    await _logout(context);
                   },
                 ),
               ]else ...[
