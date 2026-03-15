@@ -1,18 +1,18 @@
-**This project is an e-commerce mobile application composed of two separate repositories:**
+# **This project is an e-commerce mobile application composed of two separate repositories:**
 1. Backend Repository: Spring Boot REST API
 2. Frontend Repository: Flutter mobile application
 
-**The system includes:**
-1.     User registration and login
-2.     OTP email verification
-3.     JWT authentication
-4.     Products and categories
-5.     Cart and wishlist
-6.     Orders and checkout
-7.     Profile management with image upload
-8.     Email notifications 
+## **The system includes:**
+1.    User registration and login
+2.    OTP email verification
+3.    JWT authentication
+4.    Products and categories
+5.    Cart and wishlist
+6.    Orders and checkout
+7.    Profile management with image upload
+8.    Email notifications 
 
-**Environment Setup Required:**
+## **Environment Setup Required:**
 * Before running the project, install the following tools.
 * Backend Requirements:
     1. Java JDK 17 or later
@@ -28,7 +28,7 @@
     4. Android Emulator or physical Android device
     5. Flutter and Dart plugins installed in Android Studio
 
-**Verify Installed Tools:**
+## **Verify Installed Tools:**
 * Check Java:
   1. java -version
   2. javac -version
@@ -39,16 +39,17 @@
   2. flutter doctor
 Make sure all Flutter doctor issues are resolved before running the app.
 
-**Backend Setup (Spring Boot):**
-**Step 1: Clone Backend Repository**
+## **Backend Setup (Spring Boot):**
+
+### **Step 1: Clone Backend Repository**
 * git clone https://github.com/dana25578/flutter-training-backend.git
 * cd flutter-training-backend
 
-**Step 2: Create Database**
+### **Step 2: Create Database**
 * Open MySQL and run: CREATE DATABASE app_db;
 
-**Step 3: Configure application.properties**
-*     Open:src/main/resources/application.properties
+### **Step 3: Configure application.properties**
+*    Open:src/main/resources/application.properties
 * Use:
         server.port=8081
         spring.datasource.url=jdbc:mysql://localhost:3306/app_db
@@ -78,33 +79,34 @@ Make sure all Flutter doctor issues are resolved before running the app.
   4. OWNER_EMAIL
   5. YOUR_SECRET_KEY
 
-**Step 4: Build Backend**
+### **Step 4: Build Backend**
 * mvn clean install
 
-**Step 5: Run Backend**
+### **Step 5: Run Backend**
 * mvn spring-boot:run
 Or run the main class:
 * AppApplication.java
 
-**Step 6: Verify Backend Running**
+### **Step 6: Verify Backend Running**
 * Backend runs on:http://localhost:8081
 * Test:http://localhost:8081/api/products
 
-**Frontend Setup (Flutter Mobile Application)**
-**Step 1: Clone Frontend Repository**
+## **Frontend Setup (Flutter Mobile Application)**
+
+### **Step 1: Clone Frontend Repository**
 * git clone https://github.com/dana25578/flutter-training.git
 * cd flutter-training
 
-**Step 2: Install Dependencies**
+### **Step 2: Install Dependencies**
 * flutter pub get
 
-**Step 3: Open in Android Studio**
+### **Step 3: Open in Android Studio**
 * Open project folder in Android Studio
 
-**Step 4: Start Emulator**
+### **Step 4: Start Emulator**
 * Launch Android emulator
 
-**Step 5: Confirm Backend URL**
+### **Step 5: Confirm Backend URL**
 * The frontend uses:http://10.0.2.2:8081
 
 This is correct for Android emulator because:
@@ -112,29 +114,33 @@ This is correct for Android emulator because:
 * backend must already be running
 If using a physical device, replace with your computer IP:http://YOUR_LOCAL_IP:8081
 
-**Step 6: Run Flutter App**
+### **Step 6: Run Flutter App**
 * flutter run
 * Or click Run in Android Studio.
 
-**Exact Steps to Start the Full System From Scratch:**
+## **Exact Steps to Start the Full System From Scratch:**
+
 Follow this order exactly:
-**Step 1:**
+
+### **Step 1:**
+
 * Start MySQL server
 
-**Step 2:**
+### **Step 2:**
 * Create database: CREATE DATABASE app_db;
 
-**Step 3:**
+### **Step 3:**
 * Run backend:mvn spring-boot:run
 * Wait until backend starts on port 8081.
 
-**Step 4:**
+### **Step 4:**
 * Start Android emulator.
 
-**Step 5:**
+### **Step 5:**
 * Run frontend: flutter run
 
-**Step 6:**
+### **Step 6:**
+
 Test application flow:
 * Open home page
 * Register new account
@@ -147,7 +153,7 @@ Test application flow:
 * Checkout
 * View orders
 
-**API Summary:**
+## **API Summary:**
 1. Authentication:
 * POST /api/auth/register
 * POST /api/auth/login
@@ -182,7 +188,7 @@ Test application flow:
 8. Profile Image:
 * POST /api/profile/upload-image
 
-**Important Notes**
+## **Important Notes**
 * Database Tables:
  Tables are created automatically because backend uses: spring.jpa.hibernate.ddl-auto=update
 
