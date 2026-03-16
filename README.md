@@ -154,38 +154,38 @@ Test application flow:
 * View orders
 
 ## **API Summary:**
-1. Authentication:
+**1. Authentication:**
 * POST /api/auth/register
 * POST /api/auth/login
 * POST /api/auth/verify-otp
 * POST /api/auth/resend-otp
 
-2. Categories:
+**2. Categories:**
 * GET /api/categories
 
-3. Products:
+**3. Products:**
 * GET /api/products
 * GET /api/products/by-category/{categoryId}
 
-4. Cart:
+**4. Cart:**
 * GET /api/cart
 * PUT /api/cart
 * DELETE /api/cart/clear
 
-5. Wishlist:
+**5. Wishlist:**
 * GET /api/wishlist
 * PUT /api/wishlist/toggle
 * DELETE /api/wishlist/clear
 
-6. Orders:
+**6. Orders:**
 * POST /api/orders
 * GET /api/orders/by-user/{userId}
 
-7. Users:
+**7. Users:**
 * GET /api/users/{id}
 * PUT /api/users/{id}
 
-8. Profile Image:
+**8. Profile Image:**
 * POST /api/profile/upload-image
 
 ## **Important Notes**
